@@ -1,4 +1,5 @@
 // Case detail: total, due date, notes, timer, add time, entries, and case actions.
+import { showTutorialOnce } from '../tutorials.js';
 import { h } from '../dom.js';
 import { page } from '../layout.js';
 import { routes } from '../router.js';

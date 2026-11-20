@@ -1,4 +1,5 @@
 // Main screen: active cases, newest first, with search, this-week total and a New case button.
+import { showTutorialOnce } from '../tutorials.js';
 import { h } from '../dom.js';
 import { page } from '../layout.js';
 import { routes } from '../router.js';
