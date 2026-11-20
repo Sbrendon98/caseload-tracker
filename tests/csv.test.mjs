@@ -12,8 +12,7 @@ const WEEK = { start: '2026-11-15', end: '2026-11-21' };
 
 test('HEADERS: one row per case, with total time in words and a dates-and-times column', () => {
   assert.deepEqual(HEADERS, [
-    'Case ID', 'Initials', 'Case Number', 'Total Time', 'Decimal Hours',
-    'Dates and Times', 'Case Due Date', 'Case Notes',
+    'Initials', 'Case Number', 'Total Time', 'Decimal Hours', 'Dates and Times', 'Case Due Date', 'Case Notes',
   ]);
 });
 test('escapeField: plain, comma, quote, newline, null', () => {
@@ -40,7 +39,7 @@ test('several entries for one case become ONE row: total in words, and each date
   assert.ok(csv.startsWith(BOM));
   assert.equal(csv.slice(1).split('\r\n')[0], HEADERS.join(','));
   assert.deepEqual(dataRows(csv), [
-    'Jane D.-122,Jane D.,122,1 hour and 13 minutes,1.22,"Nov 16, 2026: 45 min; Nov 18, 2026: 28 min",2026-12-01,',
+    'Jane D.,122,1 hour and 13 minutes,1.22,"Nov 16, 2026: 45 min; Nov 18, 2026: 28 min",2026-12-01,',
   ]);
 });
 test('only entries inside the range count, inclusive at both ends', () => {
@@ -83,7 +82,7 @@ test('case notes are kept and escaped; formula-looking notes are neutralised', (
 });
 test('leading-zero case numbers and a missing due date come through as written', () => {
   const c = aCase({ displayId: 'A.S-00122', initials: 'A.S', caseNumber: '00122', dueDate: null, entries: [entry('2026-11-16', 5)] });
-  assert.equal(dataRows(buildCsv([c], WEEK))[0], 'A.S-00122,A.S,00122,5 minutes,0.08,"Nov 16, 2026: 5 min",,');
+  assert.equal(dataRows(buildCsv([c], WEEK))[0], 'A.S,00122,5 minutes,0.08,"Nov 16, 2026: 5 min",,');
 });
 test('rangeSummary counts the cases and entries that the export will contain', () => {
   const cases = [

@@ -182,7 +182,7 @@ test('export hands one consolidated row per case to the share sheet in the same 
   expect(files[0].name).toBe('caseload-week-2026-11-15.csv');
   const rows = (await files[0].text()).slice(1).split('\r\n').slice(1, -1);
   expect(rows).toEqual([
-    'B-1000,B,1000,1 hour and 43 minutes,1.72,"Nov 17, 2026: 1 hr 15 min (a, ""b""); Nov 19, 2026: 28 min",,',
+    'B,1000,1 hour and 43 minutes,1.72,"Nov 17, 2026: 1 hr 15 min (a, ""b""); Nov 19, 2026: 28 min",,',
   ]);
 });
 

@@ -6,7 +6,7 @@ import { decimalHours, durationInWords, durationShort, totalMinutes } from './mo
 
 export const BOM = '\uFEFF';
 export const HEADERS = [
-  'Case ID', 'Initials', 'Case Number', 'Total Time', 'Decimal Hours',
+  'Initials', 'Case Number', 'Total Time', 'Decimal Hours',
   'Dates and Times', 'Case Due Date', 'Case Notes',
 ];
 
@@ -50,7 +50,7 @@ export function rangeSummary(cases, range) {
 
 /**
  * range: {start, end} inclusive, or null for everything. Archived cases are included.
- * Only cases with time inside the range get a row, sorted by case ID.
+ * Only cases with time inside the range get a row, sorted by case ID (which is not itself a column).
  */
 export function buildCsv(cases, range) {
   const rows = [];
@@ -61,14 +61,17 @@ export function buildCsv(cases, range) {
     const dates = entries
       .map(e => `${prettyDate(e.date)}: ${durationShort(e.minutes)}${e.note ? ` (${oneLine(e.note)})` : ''}`)
       .join('; ');
-    rows.push([
-      c.displayId, c.initials, c.caseNumber,
-      durationInWords(minutes), decimalHours(minutes), dates,
-      c.dueDate ?? '', c.notes ?? '',
-    ]);
+    rows.push({
+      sortKey: c.displayId,
+      cells: [
+        c.initials, c.caseNumber,
+        durationInWords(minutes), decimalHours(minutes), dates,
+        c.dueDate ?? '', c.notes ?? '',
+      ],
+    });
   }
-  rows.sort((a, b) => a[0].localeCompare(b[0]));
-  const lines = [HEADERS, ...rows];
+  rows.sort((a, b) => a.sortKey.localeCompare(b.sortKey));
+  const lines = [HEADERS, ...rows.map(r => r.cells)];
   return BOM + lines.map(r => r.map(escapeField).join(',')).join('\r\n') + '\r\n';
 }
 
