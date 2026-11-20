@@ -102,3 +102,8 @@ export function dueStatus(dueISO, todayISO, soonDays = 7) {
 export function elapsedMinutes(startMs, nowMs) {
   return Math.max(1, Math.ceil((nowMs - startMs) / 60_000));
 }
+
+const squash = s => String(s ?? '').replace(/[^A-Za-z0-9]/g, '').toUpperCase();
+
+/** Search ignores case, dots and dashes: "as1224" finds "A.S-122445543". Empty query matches all. */
+export const matchesSearch = (displayId, query) => squash(displayId).includes(squash(query));
