@@ -2,21 +2,50 @@
 import { parseISO, daysBetween } from './dates.js';
 
 export const ACTIVE_LIMIT = 50;
-/** Initials only, never a name: more letters than this is rejected. */
-export const MAX_INITIALS = 4;
-export const INITIALS_TOO_LONG = `Use initials only, up to ${MAX_INITIALS} letters. Do not enter a student’s name.`;
+export const MAX_CASE_NUMBER = 10;
 const MAX_ENTRY_MINUTES = 24 * 60;
 
-/** "as" / "A S" / "a.s." -> "A.S". Returns '' when there are no letters. */
-export function normalizeInitials(raw) {
-  const letters = String(raw ?? '').match(/\p{L}/gu) ?? [];
-  return letters.map(c => c.toUpperCase()).join('.');
+const NAME_HELP = 'Enter a first name and last initial (Jane D.) or initials (J.D). A full last name is not accepted.';
+const MAX_INITIALS = 4;
+const MAX_FIRST_NAME_LETTERS = 20;
+
+const letterCount = token => (token.match(/\p{L}/gu) ?? []).length;
+const isAllUpper = token => token === token.toUpperCase() && token !== token.toLowerCase();
+const capitalizeName = token =>
+  token.toLowerCase().replace(/(^|[-'])(\p{L})/gu, (_, sep, ch) => sep + ch.toUpperCase());
+
+/**
+ * How a student is shown: initials ("A.S") or a first name plus last initial ("Jane D.").
+ * Returns { ok, value, error }. A full last name, a lone first name, more than 4 initials,
+ * or no letters is rejected. Short ALL-CAPS words ("AL D") count as initials, not a name.
+ */
+export function parseName(raw) {
+  const fail = { ok: false, value: '', error: NAME_HELP };
+  const cleaned = String(raw ?? '').replace(/’/g, "'").replace(/[^\p{L}\s.'-]/gu, '');
+  const tokens = cleaned.split(/[\s.]+/).map(t => t.replace(/^[-']+|[-']+$/g, '')).filter(t => letterCount(t) > 0);
+  if (tokens.length === 0) return fail;
+
+  const [first, second] = tokens;
+  const shortCaps = tokens.length === 2 && isAllUpper(first) && letterCount(first) <= 3;
+  if (tokens.length === 2 && letterCount(second) === 1 && letterCount(first) >= 2 && !shortCaps) {
+    if (letterCount(first) > MAX_FIRST_NAME_LETTERS) return fail;
+    return { ok: true, value: `${capitalizeName(first)} ${second.toUpperCase()}.`, error: null };
+  }
+
+  const looksLikeInitials = tokens.every(t => letterCount(t) === 1)
+    || tokens.every(isAllUpper)
+    || (tokens.length === 1 && letterCount(first) <= 3);
+  const letters = tokens.join('').match(/\p{L}/gu) ?? [];
+  if (looksLikeInitials && letters.length <= MAX_INITIALS) {
+    return { ok: true, value: letters.map(c => c.toUpperCase()).join('.'), error: null };
+  }
+  return fail;
 }
 
 /** Always a trimmed string so leading zeros ("00123") survive. */
 export function normalizeCaseNumber(raw) { return String(raw ?? '').trim(); }
 
-const isValidCaseNumber = s => /^[A-Za-z0-9]+$/.test(s);
+export const isValidCaseNumber = s => s.length <= MAX_CASE_NUMBER && /^[A-Za-z0-9]+$/.test(s);
 
 export const makeDisplayId = (initials, caseNumber) => `${initials}-${caseNumber}`;
 export const displayIdKey = displayId => displayId.toUpperCase();
@@ -29,11 +58,11 @@ export function findDuplicate(cases, displayId, exceptId = null) {
 
 export function validateCase(input, cases, { exceptId = null } = {}) {
   const errors = {};
-  const initials = normalizeInitials(input.initials);
+  const parsed = parseName(input.initials);
+  const initials = parsed.value;
   const caseNumber = normalizeCaseNumber(input.caseNumber);
-  if (!initials) errors.initials = 'Enter at least one letter for the initials.';
-  else if (initialsLetterCount(initials) > MAX_INITIALS) errors.initials = INITIALS_TOO_LONG;
-  if (!isValidCaseNumber(caseNumber)) errors.caseNumber = 'Enter a case number using letters and numbers only.';
+  if (!parsed.ok) errors.initials = parsed.error;
+  if (!isValidCaseNumber(caseNumber)) errors.caseNumber = `Enter a case number, up to ${MAX_CASE_NUMBER} letters or numbers.`;
 
   let dueDate = null;
   const rawDue = String(input.dueDate ?? '').trim();
@@ -111,6 +140,3 @@ const squash = s => String(s ?? '').replace(/[^A-Za-z0-9]/g, '').toUpperCase();
 
 /** Search ignores case, dots and dashes: "as1224" finds "A.S-122445543". Empty query matches all. */
 export const matchesSearch = (displayId, query) => squash(displayId).includes(squash(query));
-
-/** Number of letters in already-normalized initials ("A.S" is 2). */
-export const initialsLetterCount = initials => (initials ? initials.split('.').length : 0);

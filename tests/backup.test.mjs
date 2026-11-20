@@ -104,10 +104,21 @@ test('backupDue: after 14 days since last backup, or since the oldest case if ne
   assert.equal(backupDue({ lastBackupMs: null, cases: [aCase({ createdAt: now - 20 * DAY })], nowMs: now }), true);
   assert.equal(backupDue({ lastBackupMs: null, cases: [], nowMs: now }), false);
 });
-test('validateBackup rejects a case whose initials are really a name', () => {
+test('validateBackup rejects a case whose name is a full name', () => {
   const name = aCase({ initials: 'J.A.N.E.D.O.E', displayId: 'J.A.N.E.D.O.E-122' });
   const r = validateBackup(text({ cases: [name] }));
   assert.equal(r.ok, false);
-  assert.match(r.errors[0], /Case 1.*initials/i);
+  assert.match(r.errors[0], /Case 1.*initials or name/i);
+  const doe = aCase({ initials: 'Jane Doe', displayId: 'Jane Doe-122' });
+  assert.equal(validateBackup(text({ cases: [doe] })).ok, false);
+});
+test('validateBackup accepts initials and first name plus last initial, only in the stored form', () => {
   assert.equal(validateBackup(text({ cases: [aCase({ initials: 'A.B.C.D', displayId: 'A.B.C.D-122' })] })).ok, true);
+  assert.equal(validateBackup(text({ cases: [aCase({ initials: 'Jane D.', displayId: 'Jane D.-122' })] })).ok, true);
+  assert.equal(validateBackup(text({ cases: [aCase({ initials: 'jane d.', displayId: 'jane d.-122' })] })).ok, false); // hand-edited, not canonical
+});
+test('validateBackup rejects a case number longer than 10 characters', () => {
+  const long = aCase({ caseNumber: '12345678901', displayId: 'A.S-12345678901' });
+  assert.equal(validateBackup(text({ cases: [long] })).ok, false);
+  assert.equal(validateBackup(text({ cases: [aCase({ caseNumber: '1234567890', displayId: 'A.S-1234567890' })] })).ok, true);
 });

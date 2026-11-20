@@ -21,13 +21,13 @@ function showFormError(el, message) { el.textContent = message ?? ''; el.hidden 
 
 /** onDraft(values) fires on every edit so the caller can save a draft. */
 export function caseForm({ initial = {}, submitLabel, onSubmit, onCancel, onDraft }) {
-  const initials = field('Initials', h('input', {
-    type: 'text', value: initial.initials ?? '', placeholder: 'e.g. A S', autocomplete: 'off',
-    autocapitalize: 'characters', autocorrect: 'off', spellcheck: false, required: true, maxLength: 12,
+  const initials = field('Student (first name and last initial, or initials)', h('input', {
+    type: 'text', value: initial.initials ?? '', placeholder: 'Jane D. or J.D', autocomplete: 'off',
+    autocapitalize: 'words', autocorrect: 'off', spellcheck: false, required: true, maxLength: 30,
   }));
-  const caseNumber = field('Case number', h('input', {
-    type: 'text', value: initial.caseNumber ?? '', placeholder: 'Letters and numbers', autocomplete: 'off',
-    autocapitalize: 'none', autocorrect: 'off', spellcheck: false, inputMode: 'text', required: true,
+  const caseNumber = field('Case number (up to 10 letters or numbers)', h('input', {
+    type: 'text', value: initial.caseNumber ?? '', placeholder: '122445543', autocomplete: 'off',
+    autocapitalize: 'none', autocorrect: 'off', spellcheck: false, inputMode: 'text', required: true, maxLength: 10,
   }));
   const dueDate = field('Due date (optional)', h('input', { type: 'date', value: initial.dueDate ?? '' }));
   const notes = field('Case notes (optional)', h('textarea', {

@@ -1,23 +1,48 @@
 import assert from 'node:assert/strict';
 import { test } from './harness.mjs';
 import {
-  normalizeInitials, normalizeCaseNumber, makeDisplayId, findDuplicate, validateCase,
+  parseName, normalizeCaseNumber, makeDisplayId, findDuplicate, validateCase,
   validateEntry, totalMinutes, formatDuration, decimalHours, activeCount, canAddActive,
   dueStatus, elapsedMinutes,
 } from '../js/model.js';
 
 const mk = (id, displayId, archived = false) => ({ id, displayId, archived });
 
-test('normalizeInitials: spec examples', () => {
-  assert.equal(normalizeInitials('as'), 'A.S');
-  assert.equal(normalizeInitials('A S'), 'A.S');
-  assert.equal(normalizeInitials('a.s.'), 'A.S');
-  assert.equal(normalizeInitials(' A. B. C '), 'A.B.C');
-  assert.equal(normalizeInitials('é'), 'É');
+test('parseName: initials in any format become dotted capitals', () => {
+  const ok = (raw, want) => assert.deepEqual(parseName(raw), { ok: true, value: want, error: null }, raw);
+  ok('as', 'A.S');
+  ok('A S', 'A.S');
+  ok('a.s.', 'A.S');
+  ok(' A. B. C ', 'A.B.C');
+  ok('A B C D', 'A.B.C.D');
+  ok('J.D', 'J.D');
+  ok('é', 'É');
 });
-test('normalizeInitials: no letters gives empty string', () => {
-  assert.equal(normalizeInitials('123 -'), '');
-  assert.equal(normalizeInitials(null), '');
+test('parseName: first name plus last initial, tidily capitalized', () => {
+  const ok = (raw, want) => assert.deepEqual(parseName(raw), { ok: true, value: want, error: null }, raw);
+  ok('Jane D.', 'Jane D.');
+  ok('jane d', 'Jane D.');
+  ok('JANE D', 'Jane D.');
+  ok('Jane   d.', 'Jane D.');
+  ok('mary-jane d', 'Mary-Jane D.');
+  ok("o'neil d", "O'Neil D.");
+  ok('Al D', 'Al D.');
+});
+test('parseName: short all-caps words are initials, not names', () => {
+  assert.equal(parseName('AL D').value, 'A.L.D');
+  assert.equal(parseName('AB C').value, 'A.B.C');
+  assert.equal(parseName('JD').value, 'J.D');
+});
+test('parseName is stable: its own output parses to itself', () => {
+  for (const v of ['A.S', 'A.B.C.D', 'Jane D.', 'Mary-Jane D.', "O'Neil D.", 'Al D.']) assert.equal(parseName(v).value, v, v);
+});
+test('parseName rejects a full last name, a lone first name, too many initials, and no letters', () => {
+  for (const bad of ['Jane Doe', 'Jane Marie D', 'Jane', 'Anna', 'JaneDoe', 'JANE DOE', 'A B C D E', '123 -', '', null]) {
+    const r = parseName(bad);
+    assert.equal(r.ok, false, String(bad));
+    assert.equal(r.value, '');
+    assert.match(r.error, /first name and last initial/i);
+  }
 });
 test('case number stays a trimmed string, leading zeros kept', () => {
   assert.equal(normalizeCaseNumber('  00123 '), '00123');
@@ -112,20 +137,28 @@ test('elapsedMinutes rounds up and is at least 1', () => {
   assert.equal(elapsedMinutes(0, 25 * 60_000 + 1), 26);
   assert.equal(elapsedMinutes(5_000, 1_000), 1);      // clock went backwards: never 0 or negative
 });
-test('validateCase rejects a name typed instead of initials, and says why', () => {
+test('validateCase accepts a first name plus last initial, and builds the case ID from it', () => {
+  const r = validateCase({ initials: 'jane d', caseNumber: '5551' }, []);
+  assert.equal(r.ok, true);
+  assert.equal(r.value.initials, 'Jane D.');
+  assert.equal(r.value.displayId, 'Jane D.-5551');
+});
+test('validateCase rejects a full name with the reason, and builds no ID from it', () => {
   const r = validateCase({ initials: 'Jane Doe', caseNumber: '1' }, []);
   assert.equal(r.ok, false);
-  assert.match(r.errors.initials, /initials only, up to 4 letters/i);
-  assert.equal(validateCase({ initials: 'JaneDoe', caseNumber: '1' }, []).ok, false);
-  assert.equal(r.value.displayId, null); // nothing identifying is built from it
+  assert.match(r.errors.initials, /first name and last initial/i);
+  assert.equal(r.value.displayId, null);
 });
-test('validateCase still accepts 1 to 4 letters of initials in any format', () => {
-  for (const ok of ['A', 'A S', 'as', 'a.s.', 'A. B. C', 'M J G L', 'm-j-g-l']) {
-    assert.equal(validateCase({ initials: ok, caseNumber: '1' }, []).ok, true, ok);
-  }
-  assert.equal(validateCase({ initials: 'A B C D E', caseNumber: '1' }, []).ok, false);
+test('validateCase: case number is up to 10 letters or digits', () => {
+  assert.equal(validateCase({ initials: 'A S', caseNumber: '1234567890' }, []).ok, true);
+  const long = validateCase({ initials: 'A S', caseNumber: '12345678901' }, []);
+  assert.equal(long.ok, false);
+  assert.match(long.errors.caseNumber, /up to 10/i);
+  assert.equal(validateCase({ initials: 'A S', caseNumber: 'AB-12' }, []).ok, false);
+  assert.equal(validateCase({ initials: 'A S', caseNumber: '' }, []).ok, false);
 });
-test('updateCase-style validation also enforces the initials limit', () => {
+test('the same name rules apply when editing a case', () => {
   const cases = [{ id: '1', displayId: 'A.S-1', archived: false }];
   assert.equal(validateCase({ initials: 'Jane Doe', caseNumber: '1' }, cases, { exceptId: '1' }).ok, false);
+  assert.equal(validateCase({ initials: 'Jane D.', caseNumber: '1' }, cases, { exceptId: '1' }).ok, true);
 });

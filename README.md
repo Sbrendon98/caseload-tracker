@@ -2,11 +2,11 @@
 
 A small, private time log for a school psychologist. Log the time you spend on each student case, see it on a calendar, and export it to CSV. It runs in the browser, works offline, and installs to an iPhone Home Screen like an app.
 
-**Privacy:** there is no server. Cases are identified by **initials plus a case number only** (never a full name). Everything is stored on the device in the browser's database. Nothing is sent anywhere. The only way data leaves is when you tap *Export CSV* or *Back up* and choose where to send the file. The code makes no network requests, and a test enforces that.
+**Privacy:** there is no server. Students are identified by a **first name and last initial, or initials, plus a case number** (never a full last name). Everything is stored on the device in the browser's database. Nothing is sent anywhere. The only way data leaves is when you tap *Export CSV* or *Back up* and choose where to send the file. The code makes no network requests, and a test enforces that.
 
 ## What it does
 
-- **Cases:** add a case with initials (`a s` becomes `A.S`; up to 4 letters, anything longer is rejected so a name can't be entered by accident), a case number, an optional due date and optional notes. The ID (for example `A.S-122445543`) must be unique across active and archived cases. The app cannot tell a short name (a 4-letter first name, say) from initials, so that part is up to you.
+- **Cases:** add a case with a student's **first name and last initial** (`jane d` becomes `Jane D.`) **or initials** (`a s` becomes `A.S`), a case number of up to 10 letters or numbers, an optional due date and optional notes. A full last name (`Jane Doe`) is refused. The ID (for example `Jane D.-122445543`) must be unique across active and archived cases. Names are stored on the device and appear in exports and backups, so only enter what you are comfortable having in those files.
 - **Time entries:** add time with a date, hours and minutes, and an optional note. Quick buttons (15 min, 30 min, 45 min, 1 hr, 1.5 hr) and a start/stop timer make it fast. Entries can be edited or deleted.
 - **Due dates:** cases that are overdue or due within a week get a badge.
 - **Archiving and the 50-case limit:** up to 50 active cases. Swipe a case left to archive it (or tap the ⋯ button). When you add a 51st case, a sheet lists your oldest cases so you can archive finished ones, then your new case is created for you.
@@ -79,6 +79,8 @@ To use it on a computer too: open the site in a browser, back up on the phone, m
 ## CSV columns
 
 `Case ID, Initials, Case Number, Entry Date, Hours, Minutes, Total Minutes, Decimal Hours, Note, Case Due Date, Archived, Case Notes`
+
+The `Initials` column holds the name as shown in the Case ID (`A.S` or `Jane D.`).
 
 The file name looks like `caseload-week-2026-11-15.csv` (range plus the start date of that range).
 

@@ -3,7 +3,7 @@
 // DEPLOYING AN UPDATE: bump VERSION below on every deploy. A new worker then installs in the
 // background, waits, and the app offers "Update". tests/pwa.test.mjs fails if a file is missing here.
 
-const VERSION = 'v1';
+const VERSION = 'v2';
 const CACHE = `caseload-${VERSION}`;
 
 const APP_SHELL = [

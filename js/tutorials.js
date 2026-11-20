@@ -11,8 +11,8 @@ export const TOPICS = [
         body: 'Log the time you spend on each student case. Everything stays on this device. Nothing is ever sent anywhere.',
       },
       {
-        heading: 'Initials and a case number only',
-        body: 'Never type a student’s full name. A case is identified by initials plus a case number, like A.S-122445543.',
+        heading: 'A first name or initials, plus a case number',
+        body: 'Identify a student by a first name and last initial (Jane D.) or just initials (J.D), plus a case number, like Jane D.-122445543. Never type a student’s full name.',
       },
       {
         heading: 'Install it first',
@@ -29,8 +29,8 @@ export const TOPICS = [
     title: 'Adding a case',
     steps: [
       {
-        heading: 'Initials and a case number',
-        body: 'Type the initials any way you like: “a s” becomes A.S. Up to 4 letters are accepted, and a name will be refused. Each ID can only be used once, including cases you have archived.',
+        heading: 'Name and case number',
+        body: 'Type “Jane D.” or “J.D”, in any capitalization. A full last name will be refused. The case number can be up to 10 letters or numbers. Each ID can only be used once, including cases you have archived.',
       },
       {
         heading: 'Due date and notes',
