@@ -8,8 +8,9 @@ import { listView } from './ui/views/list.js';
 import { archivedView } from './ui/views/archived.js';
 import { detailView } from './ui/views/detail.js';
 import { calendarView } from './ui/views/calendar.js';
+import { optionsView } from './ui/views/options.js';
 
-const views = { list: listView, archived: archivedView, case: detailView, calendar: calendarView };
+const views = { list: listView, archived: archivedView, case: detailView, calendar: calendarView, options: optionsView };
 
 function fatalScreen(error) {
   const message = error instanceof StorageError ? error.message : 'Something went wrong while starting the app.';
@@ -51,13 +52,14 @@ async function boot() {
     now: () => Date.now(),
     navigate: hash => { location.hash = hash; },
     rerender: () => render({ keepScroll: true }),
+    /** Show a message in the red banner at the top of every screen. */
+    fail(message) { ctx.state.error = message; ctx.rerender(); },
     /** Await a store call; a StorageError becomes a visible banner and the result is null. */
     async guard(promise) {
       try { return await promise; }
       catch (e) {
         if (!(e instanceof StorageError)) throw e;
-        ctx.state.error = e.message;
-        ctx.rerender();
+        ctx.fail(e.message);
         return null;
       }
     },
@@ -75,8 +77,7 @@ async function boot() {
   store.subscribe(() => render({ keepScroll: true }));
   window.addEventListener('hashchange', () => render());
   window.addEventListener('unhandledrejection', e => {
-    ctx.state.error = `Something unexpected went wrong: ${e.reason?.message ?? e.reason}`;
-    ctx.rerender();
+    ctx.fail(`Something unexpected went wrong: ${e.reason?.message ?? e.reason}`);
   });
 
   if (!location.hash) history.replaceState(null, '', routes.list());
