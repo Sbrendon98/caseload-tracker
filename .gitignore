@@ -3,3 +3,7 @@
 
 # Local design notes, not published
 docs/superpowers/
+
+# Dependencies and build output
+node_modules/
+dist/
