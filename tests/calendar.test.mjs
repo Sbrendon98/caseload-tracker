@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { test } from './harness.mjs';
-import { entriesByDay, casesForDay } from '../js/calendar.js';
+import { entriesByDay, casesForDay, shiftMonth } from '../js/calendar.js';
 
 const e = (date, minutes) => ({ id: `${date}-${minutes}`, date, minutes });
 const cases = [
@@ -32,4 +32,11 @@ test('casesForDay on an empty day, and with a case filter', () => {
   assert.deepEqual(casesForDay(cases, '2026-11-20'), { total: 0, items: [] });
   assert.equal(casesForDay(cases, '2026-11-16', { caseId: 'a' }).items.length, 1);
   assert.equal(casesForDay(cases, '2026-11-17', { caseId: 'b' }).total, 0);
+});
+test('shiftMonth moves by months and rolls the year both ways', () => {
+  assert.deepEqual(shiftMonth({ year: 2026, month: 11 }, 1), { year: 2026, month: 12 });
+  assert.deepEqual(shiftMonth({ year: 2026, month: 12 }, 1), { year: 2027, month: 1 });
+  assert.deepEqual(shiftMonth({ year: 2026, month: 1 }, -1), { year: 2025, month: 12 });
+  assert.deepEqual(shiftMonth({ year: 2026, month: 6 }, -18), { year: 2024, month: 12 });
+  assert.deepEqual(shiftMonth({ year: 2026, month: 6 }, 0), { year: 2026, month: 6 });
 });

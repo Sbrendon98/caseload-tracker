@@ -169,6 +169,7 @@ export function detailView(ctx, route) {
       h('h2', {}, `Entries (${entries.length})`),
       entries.length === 0 ? h('p', { class: 'muted' }, 'No time logged yet.') : h('ul', { class: 'entries' }, entryRows)),
     h('section', { class: 'card actions' },
+      h('a', { class: 'btn block', href: routes.calendar({ caseId: c.id }) }, 'View in calendar'),
       h('button', { type: 'button', class: 'btn block', onClick: () => openEditCase(ctx, c) }, 'Edit case'),
       c.archived
         ? h('button', { type: 'button', class: 'btn block', onClick: () => unarchiveCase(ctx, c) }, 'Unarchive')

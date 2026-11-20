@@ -7,8 +7,9 @@ import { parseHash, routes } from './ui/router.js';
 import { listView } from './ui/views/list.js';
 import { archivedView } from './ui/views/archived.js';
 import { detailView } from './ui/views/detail.js';
+import { calendarView } from './ui/views/calendar.js';
 
-const views = { list: listView, archived: archivedView, case: detailView };
+const views = { list: listView, archived: archivedView, case: detailView, calendar: calendarView };
 
 function fatalScreen(error) {
   const message = error instanceof StorageError ? error.message : 'Something went wrong while starting the app.';

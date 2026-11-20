@@ -50,7 +50,7 @@ export function listView(ctx) {
   });
   drawRows();
 
-  const el = page(ctx, { title: 'Caseload', actions: [] },
+  const el = page(ctx, { title: 'Caseload', actions: [{ label: 'Calendar', href: routes.calendar() }] },
     h('p', { class: 'summary' },
       h('span', {}, `This week: ${formatDuration(totalMinutes(weekEntries))}`),
       h('span', {}, `${activeTotal} of ${ACTIVE_LIMIT} active`)),

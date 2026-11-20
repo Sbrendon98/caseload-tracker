@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from './harness.mjs';
 import { parseHash, routes } from '../js/ui/router.js';
-import { formatDateLong, formatClock } from '../js/ui/format.js';
+import { formatDateLong, formatClock, formatMonth } from '../js/ui/format.js';
 import { matchesSearch } from '../js/model.js';
 import { directionLock, clampOffset, settle } from '../js/swipe.js';
 
@@ -66,4 +66,9 @@ test('settle: fast flick wins, otherwise past halfway opens', () => {
   assert.equal(settle({ offset: -90, velocityX: 0.8, openWidth: 96 }), 'closed');
   assert.equal(settle({ offset: -60, velocityX: 0, openWidth: 96 }), 'open');
   assert.equal(settle({ offset: -30, velocityX: 0, openWidth: 96 }), 'closed');
+});
+
+test('formatMonth gives the month and year', () => {
+  assert.equal(formatMonth(2026, 11, 'en-US'), 'November 2026');
+  assert.equal(formatMonth(2027, 1, 'en-US'), 'January 2027');
 });

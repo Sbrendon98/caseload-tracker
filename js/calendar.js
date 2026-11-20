@@ -23,3 +23,9 @@ export function casesForDay(cases, date, { caseId = null } = {}) {
   items.sort((a, b) => a.displayId.localeCompare(b.displayId));
   return { total: items.reduce((sum, i) => sum + i.minutes, 0), items };
 }
+
+/** Move a { year, month (1-12) } by whole months, rolling the year as needed. */
+export function shiftMonth({ year, month }, delta) {
+  const index = year * 12 + (month - 1) + delta;
+  return { year: Math.floor(index / 12), month: (index % 12 + 12) % 12 + 1 };
+}
