@@ -1,5 +1,5 @@
 // Display formatting. Dates are shown in local calendar terms (no timezone shifting).
-import { parseISO } from '../dates.js';
+import { parseISO } from './dates.js';
 
 export function formatDateLong(iso, locale) {
   const { y, m, d } = parseISO(iso);

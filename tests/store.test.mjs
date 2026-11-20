@@ -214,3 +214,22 @@ test('meta: set, get with fallback, delete with undefined', async () => {
   await store.setMeta('x', undefined);
   assert.equal(store.getMeta('x', 'fallback'), 'fallback');
 });
+test('settings changes notify subscribers too, so screens can react to timer, week start and flags', async () => {
+  const { store } = setup();
+  let calls = 0;
+  store.subscribe(() => calls++);
+  await store.setMeta('weekStart', 1);
+  assert.equal(calls, 1);
+});
+test('version() changes on every notification and only then (a stable snapshot for the UI)', async () => {
+  const { store } = setup();
+  const v0 = store.version();
+  assert.equal(store.version(), v0);
+  await store.addCase(input(1));
+  const v1 = store.version();
+  assert.notEqual(v1, v0);
+  await store.addCase(input(1)); // rejected duplicate: nothing changed
+  assert.equal(store.version(), v1);
+  await store.setMeta('x', 1);
+  assert.notEqual(store.version(), v1);
+});

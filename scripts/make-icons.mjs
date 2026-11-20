@@ -7,7 +7,7 @@ import { mkdirSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-const outDir = join(dirname(fileURLToPath(import.meta.url)), '..', 'icons');
+const outDir = join(dirname(fileURLToPath(import.meta.url)), '..', 'public', 'icons');
 const BG = [10, 96, 214];
 const FG = [255, 255, 255];
 

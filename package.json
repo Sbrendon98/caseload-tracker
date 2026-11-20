@@ -9,8 +9,7 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "preact": "^11.2.0",
-    "wouter-preact": "^3.13.0"
+    "preact": "^11.2.0"
   },
   "devDependencies": {
     "@preact/preset-vite": "^2.10.6",

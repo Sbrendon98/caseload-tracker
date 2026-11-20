@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from './harness.mjs';
-import { parseHash, routes } from '../js/ui/router.js';
-import { formatDateLong, formatClock, formatMonth } from '../js/ui/format.js';
+import { parseHash, routes } from '../js/router.js';
+import { formatDateLong, formatClock, formatMonth } from '../js/format.js';
 import { matchesSearch } from '../js/model.js';
 import { directionLock, clampOffset, settle } from '../js/swipe.js';
 

@@ -10,8 +10,9 @@ export function createStore(db, { now = Date.now, uuid = () => crypto.randomUUID
   let state = { cases: [], tombstones: [], meta: {} };
   const listeners = new Set();
   let chain = Promise.resolve();
+  let version = 0;
 
-  const emit = () => listeners.forEach(fn => fn());
+  const emit = () => { version++; listeners.forEach(fn => fn()); };
   const serial = fn => {
     const run = chain.then(fn);
     chain = run.catch(() => {});
@@ -36,6 +37,8 @@ export function createStore(db, { now = Date.now, uuid = () => crypto.randomUUID
   const newestFirst = (a, b) => b.createdAt - a.createdAt;
 
   return {
+    /** Changes on every notification; a stable snapshot value for UI subscriptions. */
+    version: () => version,
     // ---- reads (synchronous, from the snapshot; treat results as read-only) ----
     cases: () => state.cases,
     tombstones: () => state.tombstones,
@@ -150,12 +153,13 @@ export function createStore(db, { now = Date.now, uuid = () => crypto.randomUUID
       return result;
     }),
 
-    // ---- settings, timer, drafts, tutorial flags. undefined deletes the key. No change event. ----
+    // ---- settings, timer, drafts, tutorial flags. undefined deletes the key. ----
     setMeta: (key, value) => serial(async () => {
       await db.setMeta(key, value);
       const meta = { ...state.meta };
       if (value === undefined) delete meta[key]; else meta[key] = value;
       state = { ...state, meta };
+      emit();
     }),
   };
 }
