@@ -67,7 +67,7 @@ test('one row per case, sorted by case ID', () => {
     aCase({ id: '2', displayId: 'Z.Z-1', initials: 'Z.Z', caseNumber: '1', entries: [entry('2026-11-16', 30)] }),
     aCase({ id: '3', displayId: 'A.A-1', initials: 'A.A', caseNumber: '1', entries: [entry('2026-11-16', 30), entry('2026-11-17', 30)] }),
   ];
-  assert.deepEqual(dataRows(buildCsv(cases, WEEK)).map(r => r.split(',')[0]), ['A.A-1', 'Z.Z-1']);
+  assert.deepEqual(dataRows(buildCsv(cases, WEEK)).map(r => r.split(',')[0]), ['A.A', 'Z.Z']);
 });
 test('an entry note goes in brackets after its time, on one line, and is escaped', () => {
   const c = aCase({ entries: [entry('2026-11-16', 30, { note: 'said "hi"\nthen left' })] });

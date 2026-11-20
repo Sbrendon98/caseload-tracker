@@ -84,7 +84,7 @@ To use it on a computer too: open the site in a browser, back up on the phone, m
 
 `Initials, Case Number, Total Time, Decimal Hours, Dates and Times, Case Due Date, Case Notes`
 
-Each case appears once. `Total Time` is in words and `Decimal Hours` is the same total as a number (1.22 for 1 hour and 13 minutes) so it can be added up. `Dates and Times` lists each day in date order, for example `Nov 16, 2026: 45 min; Nov 18, 2026: 28 min`; a note on an entry follows its time in brackets. Cases with no time in the chosen range are left out. The `Initials` column holds the name as shown in the Case ID (`A.S` or `Jane D.`).
+Each case appears once, ordered by its case ID (the case ID itself is not a column; `Initials` and `Case Number` are). `Total Time` is in words and `Decimal Hours` is the same total as a number (1.22 for 1 hour and 13 minutes) so it can be added up. `Dates and Times` lists each day in date order, for example `Nov 16, 2026: 45 min; Nov 18, 2026: 28 min`; a note on an entry follows its time in brackets. Cases with no time in the chosen range are left out. `Initials` holds the name as entered (`A.S` or `Jane D.`).
 
 The file name looks like `caseload-week-2026-11-15.csv` (range plus the start date of that range).
 
