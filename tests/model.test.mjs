@@ -3,7 +3,7 @@ import { test } from './harness.mjs';
 import {
   parseName, normalizeCaseNumber, makeDisplayId, findDuplicate, validateCase,
   validateEntry, totalMinutes, formatDuration, decimalHours, activeCount, canAddActive,
-  dueStatus, elapsedMinutes,
+  dueStatus, elapsedMinutes, durationInWords, durationShort,
 } from '../js/model.js';
 
 const mk = (id, displayId, archived = false) => ({ id, displayId, archived });
@@ -161,4 +161,21 @@ test('the same name rules apply when editing a case', () => {
   const cases = [{ id: '1', displayId: 'A.S-1', archived: false }];
   assert.equal(validateCase({ initials: 'Jane Doe', caseNumber: '1' }, cases, { exceptId: '1' }).ok, false);
   assert.equal(validateCase({ initials: 'Jane D.', caseNumber: '1' }, cases, { exceptId: '1' }).ok, true);
+});
+test('durationInWords: plain English, singular and plural', () => {
+  assert.equal(durationInWords(73), '1 hour and 13 minutes');
+  assert.equal(durationInWords(135), '2 hours and 15 minutes');
+  assert.equal(durationInWords(61), '1 hour and 1 minute');
+  assert.equal(durationInWords(60), '1 hour');
+  assert.equal(durationInWords(120), '2 hours');
+  assert.equal(durationInWords(45), '45 minutes');
+  assert.equal(durationInWords(1), '1 minute');
+  assert.equal(durationInWords(0), '0 minutes');
+});
+test('durationShort: compact form used inside the date list', () => {
+  assert.equal(durationShort(75), '1 hr 15 min');
+  assert.equal(durationShort(45), '45 min');
+  assert.equal(durationShort(60), '1 hr');
+  assert.equal(durationShort(120), '2 hr');
+  assert.equal(durationShort(0), '0 min');
 });

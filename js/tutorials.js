@@ -90,7 +90,7 @@ export const TOPICS = [
     steps: [
       {
         heading: 'Export a CSV',
-        body: 'Choose Week, Month, School year or All, then tap Export CSV to send it to Files, Mail, Numbers or Excel. Archived cases are included.',
+        body: 'Choose Week, Month, School year or All, then tap Export CSV to send it to Files, Mail, Numbers or Excel. Each case is one row, with its total time and every date worked.',
       },
       {
         heading: 'Back up and restore',

@@ -165,20 +165,25 @@ test('deleting an entry asks first', async () => {
   await waitFor(() => expect(store.getCase(id).entries).toHaveLength(0));
 });
 
-test('export hands the CSV to the share sheet in the same tick as the tap (iOS needs that)', async () => {
-  const { store } = await setup({ cases: 1 });
-  await store.addEntry(store.cases()[0].id, { date: '2026-11-17', hours: '1', minutes: '15', note: 'a, "b"' });
+test('export hands one consolidated row per case to the share sheet in the same tick as the tap (iOS needs that)', async () => {
+  const { store } = await setup({ cases: 2 });
+  const id = store.cases()[0].id;
+  await store.addEntry(id, { date: '2026-11-17', hours: '1', minutes: '15', note: 'a, "b"' });
+  await store.addEntry(id, { date: '2026-11-19', hours: '0', minutes: '28' });
   const share = vi.fn(() => Promise.resolve());
   vi.stubGlobal('navigator', { ...navigator, canShare: () => true, share });
   go('#/options');
-  await waitFor(() => expect(screen.getByText('1 entry in this range')).toBeTruthy());
+  await waitFor(() => expect(screen.getByText(/1 case with time in this range/)).toBeTruthy());
+  expect(screen.getByText(/\(2 entries\)/)).toBeTruthy();
 
   fireEvent.click(screen.getByRole('button', { name: 'Export CSV' }));
   expect(share).toHaveBeenCalledTimes(1); // no await between the tap and share()
   const [{ files }] = share.mock.calls[0];
   expect(files[0].name).toBe('caseload-week-2026-11-15.csv');
-  const csv = await files[0].text();
-  expect(csv).toContain('B-1000,B,1000,2026-11-17,1,15,75,1.25,"a, ""b""",,No,');
+  const rows = (await files[0].text()).slice(1).split('\r\n').slice(1, -1);
+  expect(rows).toEqual([
+    'B-1000,B,1000,1 hour and 43 minutes,1.72,"Nov 17, 2026: 1 hr 15 min (a, ""b""); Nov 19, 2026: 28 min",,',
+  ]);
 });
 
 test('Monday week start changes the export range', async () => {

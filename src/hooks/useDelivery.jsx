@@ -31,11 +31,11 @@ export function useDelivery() {
   }
 
   /** Call directly from a click handler. range is { start, end } or null for everything. */
-  function exportCsv({ kind, range, entryCount }) {
+  function exportCsv({ kind, range, summary }) {
     const csv = buildCsv(store.cases(), range);
     return deliver({ filename: exportFilename(kind, range?.start ?? today()), mime: 'text/csv', content: csv })
       .then(outcome => {
-        if (outcome === 'shared' || outcome === 'downloaded') toast(`Exported ${entryCount} ${entryCount === 1 ? 'entry' : 'entries'}`);
+        if (outcome === 'shared' || outcome === 'downloaded') toast(`Exported ${summary.cases} ${summary.cases === 1 ? 'case' : 'cases'}`);
       })
       .catch(e => fail(`Export failed: ${e?.message ?? e}`));
   }

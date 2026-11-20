@@ -8,7 +8,8 @@ import { useRestore } from '../components/RestoreSheets.jsx';
 import { useDelivery } from '../hooks/useDelivery.jsx';
 import { openTutorial, useTutorial } from '../hooks/useTutorial.jsx';
 import { formatDateShort } from '../../js/format.js';
-import { inRange, rangeFor, todayLocal } from '../../js/dates.js';
+import { rangeFor, todayLocal } from '../../js/dates.js';
+import { rangeSummary } from '../../js/csv.js';
 import { routes } from '../../js/router.js';
 import { TOPICS } from '../../js/tutorials.js';
 
@@ -40,7 +41,7 @@ export function OptionsPage() {
 
   const weekStart = store.getMeta('weekStart', 0);
   const range = rangeFor(kind, today(), weekStart);
-  const entryCount = store.cases().flatMap(c => c.entries).filter(e => inRange(e.date, range)).length;
+  const summary = rangeSummary(store.cases(), range);
   const rangeText = range ? `${formatDateShort(range.start)} to ${formatDateShort(range.end)}` : 'Everything, all dates';
   const lastBackup = store.getMeta('lastBackupAt');
 
@@ -70,9 +71,12 @@ export function OptionsPage() {
           {RANGES.map(r => <Choice key={r.kind} name="range" checked={r.kind === kind} onChange={() => setKind(r.kind)}>{r.label}</Choice>)}
         </fieldset>
         <p class="muted">{rangeText}</p>
-        <p>{entryCount} {entryCount === 1 ? 'entry' : 'entries'} in this range</p>
+        <p>
+          {summary.cases} {summary.cases === 1 ? 'case' : 'cases'} with time in this range
+          <span class="muted"> ({summary.entries} {summary.entries === 1 ? 'entry' : 'entries'})</span>
+        </p>
         <div class="button-row">
-          <button type="button" class="btn primary" disabled={entryCount === 0} onClick={() => exportCsv({ kind, range, entryCount })}>Export CSV</button>
+          <button type="button" class="btn primary" disabled={summary.cases === 0} onClick={() => exportCsv({ kind, range, summary })}>Export CSV</button>
         </div>
       </section>
 

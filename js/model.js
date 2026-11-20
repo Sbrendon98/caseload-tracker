@@ -118,6 +118,27 @@ export function formatDuration(min) {
   return `${Math.floor(m / 60)}h ${m % 60}m`;
 }
 
+const plural = (n, word) => `${n} ${word}${n === 1 ? '' : 's'}`;
+
+/** 73 -> "1 hour and 13 minutes". Used for the total in the CSV. */
+export function durationInWords(min) {
+  const m = Math.max(0, Math.round(min));
+  const hours = Math.floor(m / 60);
+  const minutes = m % 60;
+  if (hours === 0) return plural(minutes, 'minute');
+  if (minutes === 0) return plural(hours, 'hour');
+  return `${plural(hours, 'hour')} and ${plural(minutes, 'minute')}`;
+}
+
+/** 75 -> "1 hr 15 min". Compact form for the per-day list in the CSV. */
+export function durationShort(min) {
+  const m = Math.max(0, Math.round(min));
+  const hours = Math.floor(m / 60);
+  const minutes = m % 60;
+  if (hours === 0) return `${minutes} min`;
+  return minutes === 0 ? `${hours} hr` : `${hours} hr ${minutes} min`;
+}
+
 export const decimalHours = min => (min / 60).toFixed(2);
 
 export const activeCount = cases => cases.filter(c => !c.archived).length;

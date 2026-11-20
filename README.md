@@ -13,7 +13,7 @@ That promise is enforced, not just intended: the published page carries a Conten
 - **Due dates:** cases that are overdue or due within a week get a badge.
 - **Archiving and the 50-case limit:** up to 50 active cases. Swipe a case left to archive it (or tap the ⋯ button). When you add a 51st case, a sheet lists your oldest cases so you can archive finished ones, then your new case is created for you.
 - **Calendar:** a dot on every day you logged time. Tap a day to see every case you worked on that day. Filter to one student, or tap *View in calendar* on a case.
-- **Export CSV:** Week, Month, School year (July 1 to June 30) or All. One row per time entry, archived cases included, with case notes. Opens correctly in Excel and Numbers.
+- **Export CSV:** Week, Month, School year (July 1 to June 30) or All. **One row per case** with time in that range: the total in words ("1 hour and 13 minutes") and every date and time worked listed in one cell. Time on archived cases is included. Opens correctly in Excel and Numbers.
 - **Backup and restore:** save everything to a JSON file and bring it back, on the same phone or another device.
 - **Tutorials:** short pop-ups appear once, the first time each feature is used. Replay any of them from Options > Tutorials.
 - **Works offline** after the first load.
@@ -82,9 +82,9 @@ To use it on a computer too: open the site in a browser, back up on the phone, m
 
 ## CSV columns
 
-`Case ID, Initials, Case Number, Entry Date, Hours, Minutes, Total Minutes, Decimal Hours, Note, Case Due Date, Archived, Case Notes`
+`Case ID, Initials, Case Number, Total Time, Decimal Hours, Dates and Times, Case Due Date, Case Notes`
 
-The `Initials` column holds the name as shown in the Case ID (`A.S` or `Jane D.`).
+Each case appears once. `Total Time` is in words and `Decimal Hours` is the same total as a number (1.22 for 1 hour and 13 minutes) so it can be added up. `Dates and Times` lists each day in date order, for example `Nov 16, 2026: 45 min; Nov 18, 2026: 28 min`; a note on an entry follows its time in brackets. Cases with no time in the chosen range are left out. The `Initials` column holds the name as shown in the Case ID (`A.S` or `Jane D.`).
 
 The file name looks like `caseload-week-2026-11-15.csv` (range plus the start date of that range).
 
