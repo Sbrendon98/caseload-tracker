@@ -2,6 +2,9 @@
 import { parseISO, daysBetween } from './dates.js';
 
 export const ACTIVE_LIMIT = 50;
+/** Initials only, never a name: more letters than this is rejected. */
+export const MAX_INITIALS = 4;
+export const INITIALS_TOO_LONG = `Use initials only, up to ${MAX_INITIALS} letters. Do not enter a student’s name.`;
 const MAX_ENTRY_MINUTES = 24 * 60;
 
 /** "as" / "A S" / "a.s." -> "A.S". Returns '' when there are no letters. */
@@ -29,6 +32,7 @@ export function validateCase(input, cases, { exceptId = null } = {}) {
   const initials = normalizeInitials(input.initials);
   const caseNumber = normalizeCaseNumber(input.caseNumber);
   if (!initials) errors.initials = 'Enter at least one letter for the initials.';
+  else if (initialsLetterCount(initials) > MAX_INITIALS) errors.initials = INITIALS_TOO_LONG;
   if (!isValidCaseNumber(caseNumber)) errors.caseNumber = 'Enter a case number using letters and numbers only.';
 
   let dueDate = null;
@@ -107,3 +111,6 @@ const squash = s => String(s ?? '').replace(/[^A-Za-z0-9]/g, '').toUpperCase();
 
 /** Search ignores case, dots and dashes: "as1224" finds "A.S-122445543". Empty query matches all. */
 export const matchesSearch = (displayId, query) => squash(displayId).includes(squash(query));
+
+/** Number of letters in already-normalized initials ("A.S" is 2). */
+export const initialsLetterCount = initials => (initials ? initials.split('.').length : 0);

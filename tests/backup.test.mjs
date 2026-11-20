@@ -104,3 +104,10 @@ test('backupDue: after 14 days since last backup, or since the oldest case if ne
   assert.equal(backupDue({ lastBackupMs: null, cases: [aCase({ createdAt: now - 20 * DAY })], nowMs: now }), true);
   assert.equal(backupDue({ lastBackupMs: null, cases: [], nowMs: now }), false);
 });
+test('validateBackup rejects a case whose initials are really a name', () => {
+  const name = aCase({ initials: 'J.A.N.E.D.O.E', displayId: 'J.A.N.E.D.O.E-122' });
+  const r = validateBackup(text({ cases: [name] }));
+  assert.equal(r.ok, false);
+  assert.match(r.errors[0], /Case 1.*initials/i);
+  assert.equal(validateBackup(text({ cases: [aCase({ initials: 'A.B.C.D', displayId: 'A.B.C.D-122' })] })).ok, true);
+});

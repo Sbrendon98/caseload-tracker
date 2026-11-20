@@ -1,6 +1,6 @@
 // Pure backup format: build, validate, and the small "should we nudge her" rules.
 import { parseISO } from './dates.js';
-import { normalizeInitials, makeDisplayId, displayIdKey, activeCount, ACTIVE_LIMIT } from './model.js';
+import { normalizeInitials, initialsLetterCount, MAX_INITIALS, makeDisplayId, displayIdKey, activeCount, ACTIVE_LIMIT } from './model.js';
 
 export const BACKUP_APP = 'caseload-tracker';
 export const BACKUP_VERSION = 1;
@@ -55,6 +55,7 @@ export function validateBackup(text) {
     else caseIds.add(c.id);
 
     if (!isText(c.initials) || normalizeInitials(c.initials) !== c.initials) addError(`${where} has invalid initials.`);
+    else if (initialsLetterCount(c.initials) > MAX_INITIALS) addError(`${where} has initials longer than ${MAX_INITIALS} letters. Initials only are allowed.`);
     if (!isText(c.caseNumber) || !/^[A-Za-z0-9]+$/.test(c.caseNumber)) addError(`${where} has an invalid case number.`);
     if (c.displayId !== makeDisplayId(c.initials, c.caseNumber)) addError(`${where} has a displayId that does not match its initials and case number.`);
     else if (displayKeys.has(displayIdKey(c.displayId))) addError(`${where} repeats the case ID ${c.displayId}.`);

@@ -23,7 +23,7 @@ function showFormError(el, message) { el.textContent = message ?? ''; el.hidden 
 export function caseForm({ initial = {}, submitLabel, onSubmit, onCancel, onDraft }) {
   const initials = field('Initials', h('input', {
     type: 'text', value: initial.initials ?? '', placeholder: 'e.g. A S', autocomplete: 'off',
-    autocapitalize: 'characters', autocorrect: 'off', spellcheck: false, required: true,
+    autocapitalize: 'characters', autocorrect: 'off', spellcheck: false, required: true, maxLength: 12,
   }));
   const caseNumber = field('Case number', h('input', {
     type: 'text', value: initial.caseNumber ?? '', placeholder: 'Letters and numbers', autocomplete: 'off',

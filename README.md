@@ -6,7 +6,7 @@ A small, private time log for a school psychologist. Log the time you spend on e
 
 ## What it does
 
-- **Cases:** add a case with initials (`a s` becomes `A.S`), a case number, an optional due date and optional notes. The ID (for example `A.S-122445543`) must be unique across active and archived cases.
+- **Cases:** add a case with initials (`a s` becomes `A.S`; up to 4 letters, anything longer is rejected so a name can't be entered by accident), a case number, an optional due date and optional notes. The ID (for example `A.S-122445543`) must be unique across active and archived cases. The app cannot tell a short name (a 4-letter first name, say) from initials, so that part is up to you.
 - **Time entries:** add time with a date, hours and minutes, and an optional note. Quick buttons (15 min, 30 min, 45 min, 1 hr, 1.5 hr) and a start/stop timer make it fast. Entries can be edited or deleted.
 - **Due dates:** cases that are overdue or due within a week get a badge.
 - **Archiving and the 50-case limit:** up to 50 active cases. Swipe a case left to archive it (or tap the ⋯ button). When you add a 51st case, a sheet lists your oldest cases so you can archive finished ones, then your new case is created for you.

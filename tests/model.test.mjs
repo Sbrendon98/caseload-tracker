@@ -112,3 +112,20 @@ test('elapsedMinutes rounds up and is at least 1', () => {
   assert.equal(elapsedMinutes(0, 25 * 60_000 + 1), 26);
   assert.equal(elapsedMinutes(5_000, 1_000), 1);      // clock went backwards: never 0 or negative
 });
+test('validateCase rejects a name typed instead of initials, and says why', () => {
+  const r = validateCase({ initials: 'Jane Doe', caseNumber: '1' }, []);
+  assert.equal(r.ok, false);
+  assert.match(r.errors.initials, /initials only, up to 4 letters/i);
+  assert.equal(validateCase({ initials: 'JaneDoe', caseNumber: '1' }, []).ok, false);
+  assert.equal(r.value.displayId, null); // nothing identifying is built from it
+});
+test('validateCase still accepts 1 to 4 letters of initials in any format', () => {
+  for (const ok of ['A', 'A S', 'as', 'a.s.', 'A. B. C', 'M J G L', 'm-j-g-l']) {
+    assert.equal(validateCase({ initials: ok, caseNumber: '1' }, []).ok, true, ok);
+  }
+  assert.equal(validateCase({ initials: 'A B C D E', caseNumber: '1' }, []).ok, false);
+});
+test('updateCase-style validation also enforces the initials limit', () => {
+  const cases = [{ id: '1', displayId: 'A.S-1', archived: false }];
+  assert.equal(validateCase({ initials: 'Jane Doe', caseNumber: '1' }, cases, { exceptId: '1' }).ok, false);
+});

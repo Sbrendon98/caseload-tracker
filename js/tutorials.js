@@ -30,7 +30,7 @@ export const TOPICS = [
     steps: [
       {
         heading: 'Initials and a case number',
-        body: 'Type the initials any way you like: “a s” becomes A.S. Each ID can only be used once, including cases you have archived.',
+        body: 'Type the initials any way you like: “a s” becomes A.S. Up to 4 letters are accepted, and a name will be refused. Each ID can only be used once, including cases you have archived.',
       },
       {
         heading: 'Due date and notes',
