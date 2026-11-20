@@ -9,6 +9,7 @@ import { archivedView } from './ui/views/archived.js';
 import { detailView } from './ui/views/detail.js';
 import { calendarView } from './ui/views/calendar.js';
 import { optionsView } from './ui/views/options.js';
+import { registerServiceWorker } from './sw-register.js';
 
 const views = { list: listView, archived: archivedView, case: detailView, calendar: calendarView, options: optionsView };
 
@@ -47,7 +48,7 @@ async function boot() {
   let current = null;
   const ctx = {
     store,
-    state: { search: '', error: null },
+    state: { search: '', error: null, update: null },
     today: () => todayLocal(),
     now: () => Date.now(),
     navigate: hash => { location.hash = hash; },
@@ -83,6 +84,7 @@ async function boot() {
   if (!location.hash) history.replaceState(null, '', routes.list());
   render();
   requestPersistence(store);
+  registerServiceWorker({ onUpdateReady: apply => { ctx.state.update = { apply }; ctx.rerender(); } });
 }
 
 boot();

@@ -9,6 +9,11 @@ function banners(ctx) {
       h('span', {}, ctx.state.error),
       h('button', { type: 'button', class: 'banner-btn', onClick: () => { ctx.state.error = null; ctx.rerender(); } }, 'Dismiss')));
   }
+  if (ctx.state.update) {
+    items.push(h('div', { class: 'banner update', role: 'status' },
+      h('span', {}, 'A new version is ready.'),
+      h('button', { type: 'button', class: 'banner-btn', onClick: () => ctx.state.update.apply() }, 'Update')));
+  }
   const timer = ctx.store.getMeta('timer');
   const timed = timer && ctx.store.getCase(timer.caseId);
   if (timed) {
