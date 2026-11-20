@@ -1,5 +1,6 @@
 // Month calendar: a dot on every day any work was logged. Tap a day to see every case worked
 // that day. Optionally narrowed to one case (the detail screen deep-links here with ?case=).
+import { showTutorialOnce } from '../tutorials.js';
 import { h } from '../dom.js';
 import { page } from '../layout.js';
 import { routes } from '../router.js';
@@ -96,5 +97,6 @@ export function calendarView(ctx, route) {
       h('button', { type: 'button', class: 'btn', 'aria-label': 'Next month', onClick: () => move(1) }, '›')),
     grid,
     h('p', { class: 'muted cal-hint' }, 'A dot marks a day with time logged. Tap a day to see which cases you worked on.'));
+  showTutorialOnce(ctx, 'calendar');
   return { el };
 }

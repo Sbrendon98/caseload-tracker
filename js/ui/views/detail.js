@@ -176,5 +176,6 @@ export function detailView(ctx, route) {
         : h('button', { type: 'button', class: 'btn block', onClick: () => archiveWithUndo(ctx, c) }, 'Archive'),
       h('button', { type: 'button', class: 'btn block danger', onClick: deleteCase }, 'Delete case')));
 
+  showTutorialOnce(ctx, 'logTime');
   return { el, destroy: () => clearInterval(tick) };
 }

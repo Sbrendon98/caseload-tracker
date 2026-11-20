@@ -7,7 +7,8 @@ import { deliverFile } from '../share.js';
 import { startRestore } from '../restore.js';
 import { formatDateShort } from '../format.js';
 import { buildCsv, exportFilename } from '../../csv.js';
-import { buildBackup, backupFilename } from '../../backup.js';
+import { runBackup } from '../backupAction.js';
+import { TOPICS, openTutorial, resetTutorials, showTutorialOnce } from '../tutorials.js';
 import { inRange, rangeFor, todayLocal } from '../../dates.js';
 
 const RANGES = [
@@ -35,18 +36,6 @@ export function optionsView(ctx) {
     deliverFile({ filename: exportFilename(kind, range?.start ?? today), mime: 'text/csv', content: csv })
       .then(outcome => { if (outcome === 'shared' || outcome === 'downloaded') showToast(`Exported ${entryCount} ${entryCount === 1 ? 'entry' : 'entries'}`); })
       .catch(e => ctx.fail(`Export failed: ${e?.message ?? e}`));
-  }
-
-  function backup() {
-    const json = JSON.stringify(buildBackup({ cases: store.cases(), tombstones: store.tombstones() }), null, 2);
-    deliverFile({ filename: backupFilename(today), mime: 'application/json', content: json })
-      .then(async outcome => {
-        if (outcome === 'cancelled') return;
-        await ctx.guard(store.setMeta('lastBackupAt', ctx.now()));
-        if (outcome === 'shared' || outcome === 'downloaded') showToast('Backup saved');
-        ctx.rerender();
-      })
-      .catch(e => ctx.fail(`Backup failed: ${e?.message ?? e}`));
   }
 
   const lastBackup = store.getMeta('lastBackupAt');
@@ -78,7 +67,7 @@ export function optionsView(ctx) {
       h('p', { class: 'notice' }, 'Your cases and time are stored only on this device. If Safari data is cleared, the app is deleted, or you change phones, they are gone. Back up regularly and keep the file somewhere safe, like iCloud Drive.'),
       h('p', { class: 'muted' }, lastBackup ? `Last backup: ${formatDateShort(todayLocal(new Date(lastBackup)))}` : 'You have not made a backup yet.'),
       h('div', { class: 'button-row split' },
-        h('button', { type: 'button', class: 'btn primary', onClick: backup }, 'Back up'),
+        h('button', { type: 'button', class: 'btn primary', onClick: () => runBackup(ctx) }, 'Back up'),
         h('button', { type: 'button', class: 'btn', onClick: () => fileInput.click() }, 'Restore…'),
         fileInput)),
 
@@ -96,6 +85,18 @@ export function optionsView(ctx) {
       h('h2', {}, 'Storage'),
       h('p', { class: 'muted' }, persisted
         ? 'This device has agreed to keep your data unless you clear it yourself.'
-        : 'This device has not promised to keep your data when it is low on space. Backups matter.')));
+        : 'This device has not promised to keep your data when it is low on space. Backups matter.')),
+
+    h('section', { class: 'card' },
+      h('h2', {}, 'Tutorials'),
+      h('p', { class: 'muted' }, 'Replay any tutorial. Each one also appears once by itself the first time you reach that feature.'),
+      h('div', { class: 'action-list' },
+        TOPICS.map(t => h('button', { type: 'button', class: 'btn block', onClick: () => openTutorial(t.id) }, t.title))),
+      h('div', { class: 'button-row' },
+        h('button', {
+          type: 'button', class: 'btn',
+          onClick: async () => { await resetTutorials(ctx); showToast('Tutorials will appear again as you use the app.'); },
+        }, 'Show all tutorials again'))));
+  showTutorialOnce(ctx, 'exportBackup');
   return { el };
 }

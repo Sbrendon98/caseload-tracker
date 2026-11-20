@@ -58,5 +58,7 @@ export function listView(ctx) {
     h('p', { class: 'footer-link' }, h('a', { href: routes.archived() }, `Archived cases (${archivedCount})`)),
     h('div', { class: 'bottom-bar' },
       h('button', { type: 'button', class: 'btn primary block', onClick: () => openNewCase(ctx) }, '+ New case')));
+  showTutorialOnce(ctx, 'welcome');
+  if (activeTotal > 0) showTutorialOnce(ctx, 'archive');
   return { el };
 }

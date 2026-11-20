@@ -48,7 +48,7 @@ async function boot() {
   let current = null;
   const ctx = {
     store,
-    state: { search: '', error: null, update: null },
+    state: { search: '', error: null, update: null, tutorialsShown: new Set() },
     today: () => todayLocal(),
     now: () => Date.now(),
     navigate: hash => { location.hash = hash; },

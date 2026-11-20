@@ -1,5 +1,6 @@
 // Actions on a case that more than one screen offers.
 import { openModal, actionSheet, showToast } from './modal.js';
+import { showTutorialOnce } from './tutorials.js';
 import { limitFlow } from './limit.js';
 import { routes } from './router.js';
 import { caseForm, debounced } from './forms.js';
@@ -58,6 +59,7 @@ export function openNewCase(ctx) {
     },
   });
   modal = openModal({ title: 'New case', content: form.el });
+  showTutorialOnce(ctx, 'addCase');
   form.focus();
 }
 
