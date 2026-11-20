@@ -2,7 +2,9 @@
 
 A small, private time log for a school psychologist. Log the time you spend on each student case, see it on a calendar, and export it to CSV. It runs in the browser, works offline, and installs to an iPhone Home Screen like an app.
 
-**Privacy:** there is no server. Students are identified by a **first name and last initial, or initials, plus a case number** (never a full last name). Everything is stored on the device in the browser's database. Nothing is sent anywhere. The only way data leaves is when you tap *Export CSV* or *Back up* and choose where to send the file. The code makes no network requests, and a test enforces that.
+**Privacy:** there is no server. Students are identified by a **first name and last initial, or initials, plus a case number** (never a full last name). Everything is stored on the device in the browser's database. Nothing is sent anywhere. The only way data leaves is when you tap *Export CSV* or *Back up* and choose where to send the file.
+
+That promise is enforced, not just intended: the published page carries a Content-Security-Policy with `connect-src 'none'`, so the browser itself refuses any network connection from the app. Only one library (Preact) ships to the phone, and a test fails if that list grows or if any code contains a network call.
 
 ## What it does
 
@@ -25,33 +27,35 @@ A small, private time log for a school psychologist. Log the time you spend on e
 
 ## Deploy to GitHub Pages
 
-The site is plain static files, so there is nothing to build.
+The site is built by GitHub each time you push to `main` (see `.github/workflows/deploy.yml`). It runs the tests first, so a broken change is never published.
 
-1. **Push the code** to GitHub:
-   ```bash
-   git push -u origin main
-   ```
+**One-time setup**
+
+1. Push the code to GitHub: `git push -u origin main`.
 2. In the repository on github.com, open **Settings > Pages**.
-3. Under **Build and deployment**, set **Source** to **Deploy from a branch**. Choose branch **main** and folder **/ (root)**, then **Save**.
-4. Wait a minute or two. The page shows the address, which looks like:
-   `https://<your-username>.github.io/<repository-name>/`
-   For this repository: `https://sbrendon98.github.io/caseload-tracker/`
-5. Open that address in a browser to check it loads. HTTPS is automatic, and the service worker needs it.
+3. Under **Build and deployment**, set **Source** to **GitHub Actions**. (Not "Deploy from a branch".) There is nothing to save; the choice applies immediately.
+4. Open the **Actions** tab. Under "Test, build and deploy to GitHub Pages" a run starts when you push; if not, click *Run workflow*. Wait for it to turn green (about a minute).
+5. The address is shown in the run's **deploy** step and under Settings > Pages, and looks like `https://<your-username>.github.io/<repository-name>/`. For this repository: `https://sbrendon98.github.io/caseload-tracker/`.
 
 Notes:
 - A free GitHub account can publish Pages only from a **public** repository. The repository contains no student data (data lives only on each device), so public is fine.
-- The empty `.nojekyll` file in the repository root tells GitHub Pages to serve every file as it is. Keep it.
-- All file paths in the app are relative, so it works from the `/<repository-name>/` sub-path.
+- If the run fails at *Unit and component tests*, nothing is deployed and the previous version stays live. Open the failed step to see why.
+- All file paths are relative, so the app works from the `/<repository-name>/` sub-path.
 
 ### Publishing an update
 
-The service worker caches the app so it works offline. To make phones pick up a new version:
+Commit and push to `main`. The workflow tests, builds and publishes. Nothing needs to be bumped by hand: every build gets new file names, and the offline cache updates itself.
 
-1. Edit `VERSION` at the top of `sw.js` (for example `'v1'` to `'v2'`). **Do this on every deploy**, otherwise installed copies keep the old files.
-2. Commit and push. Pages republishes within a minute or two.
-3. On the phone, open the app. When the new version has downloaded, a banner says **A new version is ready**. Tap **Update**. Her data is not touched.
+On the phone, open the app. Once the new version has downloaded, a banner says **A new version is ready**. Tap **Update**. Her data is not touched.
 
-While developing locally, the old service worker can serve stale files. In the browser's developer tools, use Application > Service Workers > *Update on reload*, or unregister it.
+### Trying a change before it goes live
+
+```bash
+npm install
+npm run dev        # live-reloading dev server at http://localhost:5173
+npm run build      # production build into dist/
+npm run preview    # serve dist/ locally, with the offline cache and the CSP active
+```
 
 ## Install on iPhone
 
@@ -84,31 +88,33 @@ The `Initials` column holds the name as shown in the Case ID (`A.S` or `Jane D.`
 
 The file name looks like `caseload-week-2026-11-15.csv` (range plus the start date of that range).
 
-## Project layout
+## How it is built
+
+- **Preact** for the screens, **Vite** to build, **vite-plugin-pwa** (Workbox) for the offline cache and updates, **Vitest** with Testing Library for tests. Only Preact runs on the phone; the rest is build-time.
+- The rules that matter live in plain, framework-free JavaScript with their own tests, so they can be trusted and reused whatever the screens are built with.
 
 ```
-index.html, styles.css, manifest.webmanifest, sw.js
-js/dates.js        pure: week (Sun/Mon start), month, school year, month grid
-js/model.js        pure: initials, validation, totals, the 50-case rule
-js/csv.js          pure: CSV building and escaping
-js/calendar.js     pure: grouping entries by day
-js/backup.js       pure: backup format, validation, nudge rules
-js/merge.js        pure: two-way merge
-js/tutorials.js    pure: tutorial content and "seen once" rule
-js/db.js           IndexedDB wrapper (the only place that touches it)
-js/store.js        data API with an in-memory snapshot
-js/swipe.js        swipe-to-reveal gesture
-js/ui/             views, forms, sheets, sharing, tutorials
-icons/             generated by scripts/make-icons.mjs
-tests/             unit tests (no dependencies)
+index.html, vite.config.js, public/       manifest, icons (copied as is)
+js/                  rules and data, no framework
+  dates.js           week (Sun/Mon start), month, school year, month grid
+  model.js           names, validation, totals, the 50-case rule
+  csv.js, backup.js, merge.js, calendar.js, tutorials.js, router.js, format.js, env.js
+  db.js              IndexedDB wrapper (the only place that touches it)
+  store.js           data API with an in-memory snapshot
+  swipe.js           swipe-to-reveal gesture
+src/                 the screens
+  main.jsx, App.jsx
+  pages/             list, case, calendar, options, archived
+  components/        forms, sheets, banners, swipe row
+  context/, hooks/   shared state, dialogs, toasts, sharing, tutorials
+  lib/deliverFile.js hands a file to the iOS share sheet
+tests/               unit and component tests
+scripts/make-icons.mjs
 ```
-
-## Development
 
 ```bash
-node tests/run.mjs                 # run the unit tests (Node 18+, no installs)
-python3 -m http.server 8000        # then open http://localhost:8000
-node scripts/make-icons.mjs        # regenerate the icons
+npm test             # all tests
+node scripts/make-icons.mjs   # regenerate the icons
 ```
 
-The tests cover the date ranges, initials normalization, CSV escaping, validation, the 50-case rule, merge, backup validation, the data store (against an in-memory database), routing and swipe maths, and a guard that every app file is in the service worker's cache list and that no code can make network requests.
+The tests cover the date ranges, name normalization, CSV escaping, validation, the 50-case rule, merge, backup validation, the data store (against an in-memory database), the share-sheet hand-off, routing and swipe maths, and whole-app flows (creating cases, the archive sheet, entries, export), plus guards that no code can make a network request and that the page carries its Content-Security-Policy.

@@ -44,5 +44,6 @@ export default defineConfig({
   ],
   test: {
     include: ['tests/**/*.test.{mjs,js,jsx}'],
+    setupFiles: ['tests/setup.mjs'],
   },
 });
