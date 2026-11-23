@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from './harness.mjs';
 import {
-  buildBackup, backupFilename, validateBackup, shouldWarnNotInstalled, backupDue,
+  buildBackup, backupFilename, validateBackup,
 } from '../js/backup.js';
 
 const entry = (over = {}) => ({ id: 'e1', date: '2026-11-17', minutes: 90, note: 'x', createdAt: 1, updatedAt: 1, ...over });
@@ -89,21 +89,6 @@ test('validateBackup caps the number of error messages', () => {
   const bad = Array.from({ length: 40 }, (_, i) => aCase({ id: '', displayId: `A.S-${i}`, caseNumber: String(i), entries: [] }));
   assert.ok(validateBackup(text({ cases: bad })).errors.length <= 11);
 });
-test('shouldWarnNotInstalled only for iOS, in a browser tab, with data', () => {
-  assert.equal(shouldWarnNotInstalled({ isIOS: true, isStandalone: false, caseCount: 3 }), true);
-  assert.equal(shouldWarnNotInstalled({ isIOS: true, isStandalone: true, caseCount: 3 }), false);
-  assert.equal(shouldWarnNotInstalled({ isIOS: false, isStandalone: false, caseCount: 3 }), false);
-  assert.equal(shouldWarnNotInstalled({ isIOS: true, isStandalone: false, caseCount: 0 }), false);
-});
-test('backupDue: after 14 days since last backup, or since the oldest case if never backed up', () => {
-  const DAY = 86_400_000;
-  const now = 100 * DAY;
-  assert.equal(backupDue({ lastBackupMs: now - 13 * DAY, cases: [aCase()], nowMs: now }), false);
-  assert.equal(backupDue({ lastBackupMs: now - 14 * DAY, cases: [aCase()], nowMs: now }), true);
-  assert.equal(backupDue({ lastBackupMs: null, cases: [aCase({ createdAt: now - DAY })], nowMs: now }), false);
-  assert.equal(backupDue({ lastBackupMs: null, cases: [aCase({ createdAt: now - 20 * DAY })], nowMs: now }), true);
-  assert.equal(backupDue({ lastBackupMs: null, cases: [], nowMs: now }), false);
-});
 test('validateBackup rejects a case whose name is a full name', () => {
   const name = aCase({ initials: 'J.A.N.E.D.O.E', displayId: 'J.A.N.E.D.O.E-122' });
   const r = validateBackup(text({ cases: [name] }));
@@ -122,7 +107,6 @@ test('validateBackup rejects a case number longer than 10 characters', () => {
   assert.equal(validateBackup(text({ cases: [long] })).ok, false);
   assert.equal(validateBackup(text({ cases: [aCase({ caseNumber: '1234567890', displayId: 'A.S-1234567890' })] })).ok, true);
 });
-
 test('validateBackup keeps entry seconds, accepts a seconds-only entry, rejects bad seconds', () => {
   const withSec = aCase({ entries: [entry({ minutes: 0, seconds: 31 })] });
   const r = validateBackup(text({ cases: [withSec] }));

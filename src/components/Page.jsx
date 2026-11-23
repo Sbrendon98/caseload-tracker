@@ -3,7 +3,7 @@ import { useApp } from '../context/AppContext.jsx';
 import { useUpdate } from '../context/Update.jsx';
 import { useDelivery } from '../hooks/useDelivery.jsx';
 import { detectEnv } from '../../js/env.js';
-import { backupDue, shouldWarnNotInstalled } from '../../js/backup.js';
+import { backupDue, shouldWarnNotInstalled } from '../../js/reminders.js';
 import { routes } from '../../js/router.js';
 
 function Banners() {
