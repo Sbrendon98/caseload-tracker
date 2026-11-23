@@ -9,9 +9,9 @@ import { formatDateLong, formatMonth } from '../../js/format.js';
 import { casesForDay, entriesByDay, shiftMonth } from '../../js/calendar.js';
 import { dayOfWeek, monthGrid, parseISO } from '../../js/dates.js';
 import { routes } from '../../js/router.js';
-import { formatDuration } from '../../js/model.js';
+import { formatDurationSeconds } from '../../js/model.js';
 
-const level = minutes => (minutes >= 180 ? 3 : minutes >= 60 ? 2 : 1);
+const level = seconds => (seconds >= 180 * 60 ? 3 : seconds >= 60 * 60 ? 2 : 1);
 
 function startingMonth(today, dateParam) {
   try {
@@ -40,14 +40,14 @@ function DaySheet({ date, caseId, onClose }) {
             : (
               <>
                 <p class="total-label">Total for the day</p>
-                <p class="total">{formatDuration(total)}</p>
+                <p class="total">{formatDurationSeconds(total)}</p>
                 <ul class="case-list">
                   {items.map(i => (
                     <li key={i.caseId} class="plain-row">
                       <a class="case-link" href={routes.caseDetail(i.caseId)} onClick={dismiss}>
                         <span class="case-id">{i.displayId}</span>
                         <span class="case-meta">{i.archived ? 'Archived' : 'Active'}</span>
-                        <span class="case-total">{formatDuration(i.minutes)}</span>
+                        <span class="case-total">{formatDurationSeconds(i.seconds)}</span>
                       </a>
                     </li>
                   ))}
@@ -96,17 +96,17 @@ export function CalendarPage({ query }) {
         {weeks.map(week => (
           <div key={week[0].date} class="cal-row">
             {week.map(({ date, inMonth }) => {
-              const minutes = byDay.get(date) ?? 0;
+              const seconds = byDay.get(date) ?? 0;
               const weekday = dayOfWeek(date);
               const classes = ['cal-cell', !inMonth && 'out', (weekday === 0 || weekday === 6) && 'weekend', date === todayIso && 'today'];
               return (
                 <button
                   key={date} type="button" class={classes.filter(Boolean).join(' ')} disabled={!inMonth}
-                  aria-label={minutes > 0 ? `${formatDateLong(date)}, ${formatDuration(minutes)} logged` : formatDateLong(date)}
+                  aria-label={seconds > 0 ? `${formatDateLong(date)}, ${formatDurationSeconds(seconds)} logged` : formatDateLong(date)}
                   onClick={() => openDay(date)}
                 >
                   <span class="num">{parseISO(date).d}</span>
-                  {minutes > 0 && <span class={`dot lvl${level(minutes)}`} aria-hidden="true" />}
+                  {seconds > 0 && <span class={`dot lvl${level(seconds)}`} aria-hidden="true" />}
                 </button>
               );
             })}

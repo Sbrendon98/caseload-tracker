@@ -6,7 +6,7 @@ const aCase = (over = {}) => ({
   id: '1', displayId: 'Jane D.-122', initials: 'Jane D.', caseNumber: '122',
   dueDate: '2026-12-01', archived: false, notes: '', entries: [], ...over,
 });
-const entry = (date, minutes, over = {}) => ({ id: `${date}-${minutes}`, date, minutes, note: '', createdAt: 1, ...over });
+const entry = (date, minutes, over = {}) => ({ id: `${date}-${minutes}-${over.seconds ?? 0}`, date, minutes, note: '', createdAt: 1, ...over });
 const dataRows = csv => csv.slice(1).split('\r\n').slice(1, -1);
 const WEEK = { start: '2026-11-15', end: '2026-11-21' };
 
@@ -97,4 +97,17 @@ test('rangeSummary counts the cases and entries that the export will contain', (
 test('exportFilename', () => {
   assert.equal(exportFilename('week', '2026-11-15'), 'caseload-week-2026-11-15.csv');
   assert.equal(exportFilename('schoolyear', '2026-07-01'), 'caseload-schoolyear-2026-07-01.csv');
+});
+
+test('a timer entry under one minute is not exported as zero: it rounds up to 1 minute', () => {
+  const c = aCase({ displayId: 'A.S-9', initials: 'A.S', caseNumber: '9', dueDate: null, entries: [entry('2026-11-22', 0, { seconds: 4 })] });
+  const csv = buildCsv([c], { start: '2026-11-15', end: '2026-11-22' });
+  assert.deepEqual(dataRows(csv), ['A.S,9,1 minute,0.02,"Nov 22, 2026: 1 min",,']);
+  assert.deepEqual(rangeSummary([c], { start: '2026-11-15', end: '2026-11-22' }), { cases: 1, entries: 1 });
+});
+test('seconds add up across entries before rounding the total up to a whole minute', () => {
+  const c = aCase({ entries: [entry('2026-11-16', 1, { seconds: 31 }), entry('2026-11-17', 0, { seconds: 40 })] });
+  const [row] = dataRows(buildCsv([c], WEEK));
+  assert.match(row, /,3 minutes,0\.05,/);               // 91 s + 40 s = 131 s -> 3 min
+  assert.match(row, /Nov 16, 2026: 2 min; Nov 17, 2026: 1 min/); // each day rounded up on its own
 });

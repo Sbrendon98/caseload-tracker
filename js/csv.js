@@ -2,7 +2,10 @@
 // time in words and a single cell listing every date and time worked, so a supervisor reads one line
 // per student instead of one per time entry.
 import { inRange, parseISO } from './dates.js';
-import { decimalHours, durationInWords, durationShort, totalMinutes } from './model.js';
+import { decimalHours, durationInWords, durationShort, entrySeconds, totalSeconds } from './model.js';
+
+/** Whole minutes, rounded up, so a 4 second timer entry reads as 1 minute rather than 0. */
+const ceilMinutes = seconds => Math.ceil(seconds / 60);
 
 export const BOM = '\uFEFF';
 export const HEADERS = [
@@ -57,9 +60,9 @@ export function buildCsv(cases, range) {
   for (const c of cases) {
     const entries = entriesInRange(c, range);
     if (entries.length === 0) continue;
-    const minutes = totalMinutes(entries);
+    const minutes = ceilMinutes(totalSeconds(entries));
     const dates = entries
-      .map(e => `${prettyDate(e.date)}: ${durationShort(e.minutes)}${e.note ? ` (${oneLine(e.note)})` : ''}`)
+      .map(e => `${prettyDate(e.date)}: ${durationShort(ceilMinutes(entrySeconds(e)))}${e.note ? ` (${oneLine(e.note)})` : ''}`)
       .join('; ');
     rows.push({
       sortKey: c.displayId,

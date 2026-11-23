@@ -7,7 +7,7 @@ import { useTutorial } from '../hooks/useTutorial.jsx';
 import { formatDateShort } from '../../js/format.js';
 import { inRange, weekRange } from '../../js/dates.js';
 import { routes } from '../../js/router.js';
-import { ACTIVE_LIMIT, dueStatus, formatDuration, formatDurationSeconds, matchesSearch, totalMinutes, totalSeconds } from '../../js/model.js';
+import { ACTIVE_LIMIT, dueStatus, formatDurationSeconds, matchesSearch, totalSeconds } from '../../js/model.js';
 
 function CaseLink({ c, today }) {
   const status = dueStatus(c.dueDate, today);
@@ -43,7 +43,7 @@ export function ListPage() {
   return (
     <Page title="Caseload" actions={[{ label: 'Calendar', href: routes.calendar() }, { label: 'Options', href: routes.options() }]}>
       <p class="summary">
-        <span>This week: {formatDuration(totalMinutes(weekEntries))}</span>
+        <span>This week: {formatDurationSeconds(totalSeconds(weekEntries))}</span>
         <span>{active.length} of {ACTIVE_LIMIT} active</span>
       </p>
       <input
