@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { test } from './harness.mjs';
 import {
   todayLocal, parseISO, addDays, dayOfWeek, daysBetween, weekRange, monthRange,
-  schoolYearRange, rangeFor, inRange, monthGrid,
+  schoolYearRange, rangeFor, inRange, monthGrid, toDateTimeLocal, fromDateTimeLocal,
 } from '../js/dates.js';
 
 test('todayLocal uses local calendar date, not UTC', () => {
@@ -93,4 +93,16 @@ test('monthGrid with Monday start: Nov 2026 needs 6 rows and begins Oct 26', () 
   assert.deepEqual(g[0][0], { date: '2026-10-26', inMonth: false });
   assert.deepEqual(g[0][6], { date: '2026-11-01', inMonth: true });
   assert.deepEqual(g[5][0], { date: '2026-11-30', inMonth: true });
+});
+
+test('toDateTimeLocal / fromDateTimeLocal round-trip in local time (what a datetime-local input uses)', () => {
+  const ms = new Date(2026, 10, 20, 9, 5, 42).getTime();
+  assert.equal(toDateTimeLocal(ms), '2026-11-20T09:05');
+  assert.equal(fromDateTimeLocal('2026-11-20T09:05'), new Date(2026, 10, 20, 9, 5).getTime());
+  assert.equal(fromDateTimeLocal(toDateTimeLocal(ms)), new Date(2026, 10, 20, 9, 5).getTime());
+});
+test('fromDateTimeLocal rejects blank and impossible values', () => {
+  for (const bad of ['', null, undefined, 'nope', '2026-02-30T10:00', '2026-11-20T25:00', '2026-11-20']) {
+    assert.ok(Number.isNaN(fromDateTimeLocal(bad)), String(bad));
+  }
 });

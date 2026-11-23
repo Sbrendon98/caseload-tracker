@@ -3,7 +3,7 @@ import { parseISO, daysBetween } from './dates.js';
 
 export const ACTIVE_LIMIT = 50;
 export const MAX_CASE_NUMBER = 10;
-const MAX_ENTRY_MINUTES = 24 * 60;
+export const MAX_ENTRY_MINUTES = 24 * 60;
 
 const NAME_HELP = 'Enter a first name and last initial (Jane D.) or initials (J.D). A full last name is not accepted.';
 const MAX_INITIALS = 4;
@@ -161,3 +161,19 @@ const squash = s => String(s ?? '').replace(/[^A-Za-z0-9]/g, '').toUpperCase();
 
 /** Search ignores case, dots and dashes: "as1224" finds "A.S-122445543". Empty query matches all. */
 export const matchesSearch = (displayId, query) => squash(displayId).includes(squash(query));
+
+/**
+ * Stopping a timer. Returns { ok: true, minutes } or { ok: false, reason: 'too-long' } when it has run
+ * past the 24-hour entry limit (she probably forgot it), so the caller can ask instead of guessing.
+ */
+export function timerStop(startMs, nowMs) {
+  const minutes = elapsedMinutes(startMs, nowMs);
+  return minutes > MAX_ENTRY_MINUTES ? { ok: false, reason: 'too-long', minutes } : { ok: true, minutes };
+}
+
+/** A corrected timer start must be a real time and cannot be in the future. */
+export function validateTimerStart(startMs, nowMs) {
+  if (!Number.isFinite(startMs)) return { ok: false, error: 'Enter a valid date and time.' };
+  if (startMs > nowMs) return { ok: false, error: 'The start time cannot be in the future.' };
+  return { ok: true, error: null };
+}

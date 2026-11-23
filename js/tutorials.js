@@ -48,7 +48,7 @@ export const TOPICS = [
       },
       {
         heading: 'Use the timer',
-        body: 'Tap Start timer when you begin. When you stop, the time is filled in for you to check and save. The timer keeps running even if you close the app.',
+        body: 'Tap Start timer when you begin and Stop timer and save when you finish; the time is added to the case right away. The timer keeps running even if you close the app. Started late or forgot to stop? Use Edit start time while it runs, or tap Edit on the saved entry afterwards.',
       },
       {
         heading: 'Fix mistakes',

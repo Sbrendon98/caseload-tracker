@@ -3,7 +3,7 @@ import { test } from './harness.mjs';
 import {
   parseName, normalizeCaseNumber, makeDisplayId, findDuplicate, validateCase,
   validateEntry, totalMinutes, formatDuration, decimalHours, activeCount, canAddActive,
-  dueStatus, elapsedMinutes, durationInWords, durationShort,
+  dueStatus, elapsedMinutes, durationInWords, durationShort, timerStop, validateTimerStart,
 } from '../js/model.js';
 
 const mk = (id, displayId, archived = false) => ({ id, displayId, archived });
@@ -178,4 +178,20 @@ test('durationShort: compact form used inside the date list', () => {
   assert.equal(durationShort(60), '1 hr');
   assert.equal(durationShort(120), '2 hr');
   assert.equal(durationShort(0), '0 min');
+});
+
+test('timerStop: minutes rounded up; over 24 hours is not silently capped', () => {
+  const H = 3_600_000;
+  assert.deepEqual(timerStop(0, 91_000), { ok: true, minutes: 2 });
+  assert.deepEqual(timerStop(0, 24 * H), { ok: true, minutes: 1440 });
+  const late = timerStop(0, 24 * H + 60_000);
+  assert.equal(late.ok, false);
+  assert.equal(late.reason, 'too-long');
+});
+test('validateTimerStart: must be a real time, not in the future, and not absurdly old', () => {
+  const now = new Date(2026, 10, 20, 12).getTime();
+  assert.equal(validateTimerStart(now - 60_000, now).ok, true);
+  assert.equal(validateTimerStart(now, now).ok, true);
+  assert.match(validateTimerStart(now + 60_000, now).error, /future/i);
+  assert.match(validateTimerStart(NaN, now).error, /valid date and time/i);
 });

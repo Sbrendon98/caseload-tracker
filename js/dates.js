@@ -99,3 +99,22 @@ export function monthGrid(year, month, weekStart = 0) {
   } while (cursor <= end);
   return weeks;
 }
+
+/** ms -> 'YYYY-MM-DDTHH:mm' in local time, the value format of <input type="datetime-local">. */
+export function toDateTimeLocal(ms) {
+  const d = new Date(ms);
+  return `${formatISO(d.getFullYear(), d.getMonth() + 1, d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
+/** The reverse. Returns NaN for blank or impossible values. */
+export function fromDateTimeLocal(text) {
+  const match = /^(\d{4}-\d{2}-\d{2})T(\d{2}):(\d{2})$/.exec(String(text ?? ''));
+  if (!match) return NaN;
+  const hours = +match[2];
+  const minutes = +match[3];
+  if (hours > 23 || minutes > 59) return NaN;
+  try {
+    const { y, m, d } = parseISO(match[1]);
+    return new Date(y, m - 1, d, hours, minutes).getTime();
+  } catch { return NaN; }
+}
