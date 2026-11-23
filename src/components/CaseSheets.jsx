@@ -12,7 +12,7 @@ import { SwipeRow } from './SwipeRow.jsx';
 import { formatDateShort } from '../../js/format.js';
 import { todayLocal } from '../../js/dates.js';
 import { routes } from '../../js/router.js';
-import { ACTIVE_LIMIT, activeCount, canAddActive, formatDuration, totalMinutes } from '../../js/model.js';
+import { ACTIVE_LIMIT, activeCount, canAddActive, formatDurationSeconds, totalSeconds } from '../../js/model.js';
 
 const DRAFT_NEW_CASE = 'draft:newCase';
 
@@ -111,7 +111,7 @@ export function LimitSheet({ retry, onResult, onClose }) {
                 <div class="case-link">
                   <span class="case-id">{c.displayId}</span>
                   <span class="case-meta">Added {formatDateShort(todayLocal(new Date(c.createdAt)))}</span>
-                  <span class="case-total">{formatDuration(totalMinutes(c.entries))}</span>
+                  <span class="case-total">{formatDurationSeconds(totalSeconds(c.entries))}</span>
                 </div>
               </SwipeRow>
             ))}

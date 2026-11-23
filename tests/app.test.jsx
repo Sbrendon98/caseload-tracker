@@ -149,7 +149,7 @@ test('time: a quick button fills the form, adding updates the total, zero time i
   await waitFor(() => expect(store.getCase(id).entries).toHaveLength(1));
   expect(store.getCase(id).entries[0].minutes).toBe(90);
   expect(store.getCase(id).entries[0].date).toBe('2026-11-20'); // defaults to "today"
-  await waitFor(() => expect(document.querySelector('.total').textContent).toBe('1h 30m'));
+  await waitFor(() => expect(document.querySelector('.total').textContent).toBe('1h 30m 0s'));
   expect(screen.getByLabelText('Hours').value).toBe(''); // form reset for the next entry
 });
 
@@ -234,18 +234,19 @@ async function openCaseWithRunningTimer() {
   return { ...ctx, id };
 }
 
-test('Stop saves the time right away: a 1 min 31 s timer adds a 2 minute entry and updates the total', async () => {
+test('Stop saves the time right away: a 1 min 31 s timer adds exactly 1m 31s and the total shows the seconds', async () => {
   const { store, time, id } = await openCaseWithRunningTimer();
   time.now += 91_000;
   fireEvent.click(screen.getByRole('button', { name: 'Stop timer and save' }));
   await waitFor(() => expect(store.getCase(id).entries).toHaveLength(1));
   const entry = store.getCase(id).entries[0];
-  expect(entry.minutes).toBe(2);
+  expect(entry.minutes).toBe(1);
+  expect(entry.seconds).toBe(31);
   expect(entry.date).toBe('2026-11-20');
   await waitFor(() => expect(store.getMeta('timer')).toBeUndefined());
-  await waitFor(() => expect(document.querySelector('.total').textContent).toBe('0h 2m'));
+  await waitFor(() => expect(document.querySelector('.total').textContent).toBe('0h 1m 31s'));
   await waitFor(() => expect(screen.getByRole('button', { name: 'Start timer' })).toBeTruthy()); // back to ready
-  expect(screen.getByText('Saved 0h 2m')).toBeTruthy();
+  expect(screen.getByText('Saved 0h 1m 31s')).toBeTruthy();
 });
 
 test('the toast after stopping has an Edit button that opens that entry to correct the time', async () => {
@@ -260,7 +261,7 @@ test('the toast after stopping has an Edit button that opens that entry to corre
   type(within(form).getByLabelText('Minutes'), '25');
   fireEvent.click(within(form).getByRole('button', { name: 'Save' }));
   await waitFor(() => expect(store.getCase(id).entries[0].minutes).toBe(25));
-  await waitFor(() => expect(document.querySelector('.total').textContent).toBe('0h 25m'));
+  await waitFor(() => expect(document.querySelector('.total').textContent).toBe('0h 25m 0s'));
 });
 
 test('a saved entry can be edited later from the list, to fix a forgotten timer', async () => {
@@ -325,4 +326,25 @@ test('tapping Stop twice quickly saves ONE entry, not two', async () => {
   await new Promise(r => setTimeout(r, 50));
   expect(store.getCase(id).entries).toHaveLength(1);
   expect(store.getCase(id).entries[0].minutes).toBe(5);
+});
+
+test('editing only the note of a timer entry keeps its seconds; changing the minutes resets them', async () => {
+  const { store, time, id } = await openCaseWithRunningTimer();
+  time.now += 91_000;
+  fireEvent.click(screen.getByRole('button', { name: 'Stop timer and save' }));
+  await waitFor(() => expect(store.getCase(id).entries).toHaveLength(1));
+  await waitFor(() => expect(document.querySelector('.entry-actions')).toBeTruthy());
+  fireEvent.click(within(document.querySelector('.entry-actions')).getByRole('button', { name: 'Edit' }));
+  await waitFor(() => expect(sheet()?.textContent).toContain('Edit time entry'));
+  type(within(sheet()).getByLabelText('Note (optional)'), 'phone call');
+  fireEvent.click(within(sheet()).getByRole('button', { name: 'Save' }));
+  await waitFor(() => expect(store.getCase(id).entries[0].note).toBe('phone call'));
+  expect(store.getCase(id).entries[0].seconds).toBe(31);
+
+  fireEvent.click(within(document.querySelector('.entry-actions')).getByRole('button', { name: 'Edit' }));
+  await waitFor(() => expect(sheet()?.textContent).toContain('Edit time entry'));
+  type(within(sheet()).getByLabelText('Minutes'), '10');
+  fireEvent.click(within(sheet()).getByRole('button', { name: 'Save' }));
+  await waitFor(() => expect(store.getCase(id).entries[0].minutes).toBe(10));
+  expect(store.getCase(id).entries[0].seconds).toBe(0);
 });

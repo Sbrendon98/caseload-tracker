@@ -77,12 +77,14 @@ export function validateBackup(text) {
       else if (entryIds.has(e.id)) addError(`${ew} repeats the id ${e.id}.`);
       else entryIds.add(e.id);
       if (!isDate(e.date)) addError(`${ew} has an invalid date.`);
-      if (!Number.isInteger(e.minutes) || e.minutes < 1 || e.minutes > 24 * 60) addError(`${ew} has an invalid time.`);
+      const secs = e.seconds ?? 0;
+      if (!Number.isInteger(secs) || secs < 0 || secs > 59) addError(`${ew} has invalid seconds.`);
+      else if (!Number.isInteger(e.minutes) || e.minutes < 0 || e.minutes > 24 * 60 || e.minutes * 60 + secs < 1 || e.minutes * 60 + secs > 24 * 3600) addError(`${ew} has an invalid time.`);
       if (e.note != null && typeof e.note !== 'string') addError(`${ew} has an invalid note.`);
       if (!isTime(e.createdAt)) addError(`${ew} has an invalid createdAt.`);
       if (e.updatedAt != null && !isTime(e.updatedAt)) addError(`${ew} has an invalid updatedAt.`);
       entries.push({
-        id: e.id, date: e.date, minutes: e.minutes, note: e.note ?? '',
+        id: e.id, date: e.date, minutes: e.minutes, seconds: e.seconds ?? 0, note: e.note ?? '',
         createdAt: e.createdAt, updatedAt: e.updatedAt ?? e.createdAt,
       });
     });

@@ -122,3 +122,13 @@ test('validateBackup rejects a case number longer than 10 characters', () => {
   assert.equal(validateBackup(text({ cases: [long] })).ok, false);
   assert.equal(validateBackup(text({ cases: [aCase({ caseNumber: '1234567890', displayId: 'A.S-1234567890' })] })).ok, true);
 });
+
+test('validateBackup keeps entry seconds, accepts a seconds-only entry, rejects bad seconds', () => {
+  const withSec = aCase({ entries: [entry({ minutes: 0, seconds: 31 })] });
+  const r = validateBackup(text({ cases: [withSec] }));
+  assert.equal(r.ok, true, r.errors.join('; '));
+  assert.equal(r.data.cases[0].entries[0].seconds, 31);
+  assert.equal(validateBackup(text({ cases: [aCase({ entries: [entry({ seconds: 60 })] })] })).ok, false);
+  assert.equal(validateBackup(text({ cases: [aCase({ entries: [entry({ minutes: 0 })] })] })).ok, false); // still no zero entries
+  assert.equal(validateBackup(text({ cases: [aCase({ entries: [entry({ minutes: 5 })] })] })).data.cases[0].entries[0].seconds, 0);
+});

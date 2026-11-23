@@ -12,7 +12,7 @@ import { navigate } from '../hooks/useRoute.js';
 import { formatClock, formatDateLong } from '../../js/format.js';
 import { fromDateTimeLocal, todayLocal, toDateTimeLocal } from '../../js/dates.js';
 import { routes } from '../../js/router.js';
-import { formatDuration, timerStop, totalMinutes, validateEntry, validateTimerStart } from '../../js/model.js';
+import { entrySeconds, formatDurationSeconds, timerStop, totalSeconds, validateEntry, validateTimerStart } from '../../js/model.js';
 
 /** Fix when a timer was started late or forgotten. Also shown when it has run past 24 hours. */
 function StartTimeSheet({ startedAt, tooLong, onSave, onClose }) {
@@ -114,11 +114,12 @@ function TimerCard({ c }) {
       date: todayLocal(new Date(timer.startedAt)),
       hours: String(Math.floor(result.minutes / 60)),
       minutes: String(result.minutes % 60),
+      seconds: result.seconds,
       note: '',
     }));
     if (!r?.ok) return; // a storage error is already on screen; the timer is still running
     await guard(store.setMeta('timer', undefined));
-    toast(`Saved ${formatDuration(r.entry.minutes)}`, {
+    toast(`Saved ${formatDurationSeconds(entrySeconds(r.entry))}`, {
       actionLabel: 'Edit',
       onAction: () => dialogs.open(({ close }) => <EditEntrySheet caseId={c.id} entry={r.entry} onClose={close} />),
     });
@@ -130,7 +131,7 @@ function TimerCard({ c }) {
         <h2>Timer running</h2>
         <p class="clock">{formatClock(tick - timer.startedAt)}</p>
         <p class="muted">Started {new Date(timer.startedAt).toLocaleString(undefined, { weekday: 'short', hour: 'numeric', minute: '2-digit' })}</p>
-        <div class="button-row">
+        <div class="timer-actions">
           <button type="button" class="btn" onClick={discard}>Discard</button>
           <button type="button" class="btn" onClick={() => openStartTime(false)}>Edit start time</button>
           <button type="button" class="btn primary" disabled={busy} onClick={stop}>Stop timer and save</button>
@@ -160,7 +161,9 @@ function EditEntrySheet({ caseId, entry, onClose }) {
           today={today()} submitLabel="Save" errors={errors} onCancel={dismiss}
           initial={{ date: entry.date, hours: String(Math.floor(entry.minutes / 60)), minutes: String(entry.minutes % 60), note: entry.note }}
           onSubmit={async values => {
-            const r = await guard(store.updateEntry(caseId, entry.id, values));
+            // Seconds from a timer are kept unless she changed the hours or minutes.
+            const unchanged = Number(values.hours || 0) * 60 + Number(values.minutes || 0) === entry.minutes;
+            const r = await guard(store.updateEntry(caseId, entry.id, { ...values, seconds: unchanged ? entry.seconds ?? 0 : 0 }));
             if (!r) return;
             if (!r.ok) { setErrors(r.errors ?? {}); return; }
             dismiss();
@@ -209,7 +212,7 @@ export function CasePage({ id }) {
     if (await guard(store.setMeta(draftKey, undefined)) === null) return;
     const r = await guard(store.addEntry(c.id, values));
     if (r?.ok) {
-      toast(`Added ${formatDuration(r.entry.minutes)}`, { ms: 2500 });
+      toast(`Added ${formatDurationSeconds(entrySeconds(r.entry))}`, { ms: 2500 });
       setFormKey(k => k + 1);
     }
   }
@@ -217,7 +220,7 @@ export function CasePage({ id }) {
   async function deleteEntry(entry) {
     const ok = await dialogs.confirm({
       title: 'Delete this entry?',
-      message: `${formatDateLong(entry.date)}, ${formatDuration(entry.minutes)}. This cannot be undone.`,
+      message: `${formatDateLong(entry.date)}, ${formatDurationSeconds(entrySeconds(entry))}. This cannot be undone.`,
       confirmLabel: 'Delete', danger: true,
     });
     if (ok) await guard(store.deleteEntry(c.id, entry.id));
@@ -243,7 +246,7 @@ export function CasePage({ id }) {
     <Page title={c.displayId} back={c.archived ? { label: 'Archived', href: routes.archived() } : { label: 'Cases', href: routes.list() }}>
       <section class="card">
         <p class="total-label">{c.archived ? 'Archived · total time' : 'Total time'}</p>
-        <p class="total">{formatDuration(totalMinutes(c.entries))}</p>
+        <p class="total">{formatDurationSeconds(totalSeconds(c.entries))}</p>
         <div class="row-inline">
           <label class="label">
             Due date
@@ -278,7 +281,7 @@ export function CasePage({ id }) {
                 <li key={e.id} class="entry">
                   <div class="entry-head">
                     <span class="entry-date">{formatDateLong(e.date)}</span>
-                    <span class="entry-time">{formatDuration(e.minutes)}</span>
+                    <span class="entry-time">{formatDurationSeconds(entrySeconds(e))}</span>
                   </div>
                   {e.note && <p class="entry-note">{e.note}</p>}
                   <div class="entry-actions">

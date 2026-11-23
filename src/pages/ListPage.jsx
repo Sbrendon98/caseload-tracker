@@ -7,7 +7,7 @@ import { useTutorial } from '../hooks/useTutorial.jsx';
 import { formatDateShort } from '../../js/format.js';
 import { inRange, weekRange } from '../../js/dates.js';
 import { routes } from '../../js/router.js';
-import { ACTIVE_LIMIT, dueStatus, formatDuration, matchesSearch, totalMinutes } from '../../js/model.js';
+import { ACTIVE_LIMIT, dueStatus, formatDuration, formatDurationSeconds, matchesSearch, totalMinutes, totalSeconds } from '../../js/model.js';
 
 function CaseLink({ c, today }) {
   const status = dueStatus(c.dueDate, today);
@@ -18,7 +18,7 @@ function CaseLink({ c, today }) {
         {c.dueDate ? `Due ${formatDateShort(c.dueDate)}` : 'No due date'}
         {status && <span class={`badge ${status}`}>{status === 'overdue' ? 'Overdue' : 'Due soon'}</span>}
       </span>
-      <span class="case-total">{formatDuration(totalMinutes(c.entries))}</span>
+      <span class="case-total">{formatDurationSeconds(totalSeconds(c.entries))}</span>
     </a>
   );
 }

@@ -5,7 +5,7 @@ import { useCaseActions } from '../hooks/useCaseActions.jsx';
 import { formatDateShort } from '../../js/format.js';
 import { todayLocal } from '../../js/dates.js';
 import { routes } from '../../js/router.js';
-import { formatDuration, totalMinutes } from '../../js/model.js';
+import { formatDurationSeconds, totalSeconds } from '../../js/model.js';
 
 export function ArchivedPage() {
   const { store } = useApp();
@@ -23,7 +23,7 @@ export function ArchivedPage() {
                 <a class="case-link" href={routes.caseDetail(c.id)}>
                   <span class="case-id">{c.displayId}</span>
                   <span class="case-meta">Archived {formatDateShort(todayLocal(new Date(c.archivedAt)))}</span>
-                  <span class="case-total">{formatDuration(totalMinutes(c.entries))}</span>
+                  <span class="case-total">{formatDurationSeconds(totalSeconds(c.entries))}</span>
                 </a>
                 <button type="button" class="btn small" aria-label={`Unarchive ${c.displayId}`} onClick={() => unarchiveCase(c)}>
                   Unarchive

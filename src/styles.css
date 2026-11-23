@@ -178,7 +178,7 @@ textarea { resize: vertical; }
 .toast-action { min-height: var(--tap); padding: 0 10px; background: none; border: 0; color: inherit; font: inherit; font-weight: 700; text-decoration: underline; cursor: pointer; }
 
 /* ---------- calendar ---------- */
-a.btn { display: flex; align-items: center; justify-content: center; text-decoration: none; }
+a.btn, a.btn.block { display: flex; align-items: center; justify-content: center; text-decoration: none; }
 .cal-nav { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: 4px 0 8px; }
 .cal-title { margin: 0; font-size: 1.15rem; text-align: center; flex: 1; }
 .cal-grid { background: var(--surface); border-radius: var(--radius); padding: 8px 6px; }
@@ -223,3 +223,14 @@ a.btn:focus-visible, .btn:focus-visible, .chip:focus-visible { outline: 3px soli
 .tutorial h3 { margin: 4px 0 8px; font-size: 1.2rem; }
 .tutorial p { margin-bottom: 10px; }
 .steps-count { font-size: 0.85rem; }
+
+/* ---------- layout hardening (narrow phones, Safari date inputs) ---------- */
+.button-row { flex-wrap: wrap; }
+.row-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.row-inline > *, .row-2 > *, .field, .case-link { min-width: 0; }
+input[type="date"], input[type="datetime-local"] { min-width: 0; max-width: 100%; -webkit-appearance: none; appearance: none; }
+.btn { box-sizing: border-box; }
+a.btn, a.btn.block { display: flex; align-items: center; justify-content: center; text-decoration: none; text-align: center; line-height: 1.2; }
+/* Timer: Stop is the main action, so it gets its own full-width row above the two smaller ones. */
+.timer-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-top: 14px; }
+.timer-actions .primary { grid-column: 1 / -1; grid-row: 1; }

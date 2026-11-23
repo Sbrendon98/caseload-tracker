@@ -99,19 +99,33 @@ export function validateEntry(input) {
   const date = String(input.date ?? '').trim();
   try { parseISO(date); } catch { errors.date = 'Enter a valid date.'; }
 
+  const seconds = toWhole(input.seconds);
+  if (!(seconds >= 0 && seconds <= 59)) errors.seconds = 'Seconds must be a whole number from 0 to 59.';
+
   const total = hours * 60 + minutes;
-  if (!errors.hours && !errors.minutes) {
-    if (total <= 0) errors.total = 'Enter a time greater than 0.';
-    else if (total > MAX_ENTRY_MINUTES) errors.total = 'A single entry cannot be more than 24 hours.';
+  if (!errors.hours && !errors.minutes && !errors.seconds) {
+    const totalSec = total * 60 + seconds;
+    if (totalSec <= 0) errors.total = 'Enter a time greater than 0.';
+    else if (totalSec > MAX_ENTRY_MINUTES * 60) errors.total = 'A single entry cannot be more than 24 hours.';
   }
   return {
     ok: Object.keys(errors).length === 0,
     errors,
-    value: { date, minutes: total, note: String(input.note ?? '').trim() },
+    value: { date, minutes: total, seconds, note: String(input.note ?? '').trim() },
   };
 }
 
 export const totalMinutes = entries => entries.reduce((sum, e) => sum + e.minutes, 0);
+
+/** Entries made before seconds existed have none. */
+export const entrySeconds = e => e.minutes * 60 + (e.seconds ?? 0);
+export const totalSeconds = entries => entries.reduce((sum, e) => sum + entrySeconds(e), 0);
+
+/** 5442 -> "1h 30m 42s". Shown for case totals and entries in the app. */
+export function formatDurationSeconds(sec) {
+  const t = Math.max(0, Math.round(sec));
+  return `${Math.floor(t / 3600)}h ${Math.floor((t % 3600) / 60)}m ${t % 60}s`;
+}
 
 export function formatDuration(min) {
   const m = Math.max(0, Math.round(min));
@@ -167,8 +181,10 @@ export const matchesSearch = (displayId, query) => squash(displayId).includes(sq
  * past the 24-hour entry limit (she probably forgot it), so the caller can ask instead of guessing.
  */
 export function timerStop(startMs, nowMs) {
-  const minutes = elapsedMinutes(startMs, nowMs);
-  return minutes > MAX_ENTRY_MINUTES ? { ok: false, reason: 'too-long', minutes } : { ok: true, minutes };
+  const total = Math.max(1, Math.floor((nowMs - startMs) / 1000)); // whole seconds, never a zero-length entry
+  const minutes = Math.floor(total / 60);
+  const seconds = total % 60;
+  return total > MAX_ENTRY_MINUTES * 60 ? { ok: false, reason: 'too-long', minutes, seconds } : { ok: true, minutes, seconds };
 }
 
 /** A corrected timer start must be a real time and cannot be in the future. */

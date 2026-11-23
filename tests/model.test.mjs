@@ -3,7 +3,7 @@ import { test } from './harness.mjs';
 import {
   parseName, normalizeCaseNumber, makeDisplayId, findDuplicate, validateCase,
   validateEntry, totalMinutes, formatDuration, decimalHours, activeCount, canAddActive,
-  dueStatus, elapsedMinutes, durationInWords, durationShort, timerStop, validateTimerStart,
+  dueStatus, elapsedMinutes, durationInWords, durationShort, timerStop, validateTimerStart, formatDurationSeconds, entrySeconds, totalSeconds,
 } from '../js/model.js';
 
 const mk = (id, displayId, archived = false) => ({ id, displayId, archived });
@@ -84,7 +84,7 @@ test('validateCase allows editing a case without tripping on itself', () => {
 test('validateEntry converts hours+minutes to total minutes', () => {
   const r = validateEntry({ date: '2026-11-20', hours: '1', minutes: '15', note: '  hi ' });
   assert.equal(r.ok, true);
-  assert.deepEqual(r.value, { date: '2026-11-20', minutes: 75, note: 'hi' });
+  assert.deepEqual(r.value, { date: '2026-11-20', minutes: 75, seconds: 0, note: 'hi' });
 });
 test('validateEntry treats blank hours or minutes as 0', () => {
   assert.equal(validateEntry({ date: '2026-11-20', hours: '', minutes: '30' }).value.minutes, 30);
@@ -180,10 +180,13 @@ test('durationShort: compact form used inside the date list', () => {
   assert.equal(durationShort(0), '0 min');
 });
 
-test('timerStop: minutes rounded up; over 24 hours is not silently capped', () => {
+test('timerStop keeps the exact seconds; over 24 hours is not silently capped', () => {
   const H = 3_600_000;
-  assert.deepEqual(timerStop(0, 91_000), { ok: true, minutes: 2 });
-  assert.deepEqual(timerStop(0, 24 * H), { ok: true, minutes: 1440 });
+  assert.deepEqual(timerStop(0, 91_000), { ok: true, minutes: 1, seconds: 31 });
+  assert.deepEqual(timerStop(0, 91_900), { ok: true, minutes: 1, seconds: 31 }); // whole seconds, not rounded up
+  assert.deepEqual(timerStop(0, 400), { ok: true, minutes: 0, seconds: 1 });      // never saves a zero-length entry
+  assert.deepEqual(timerStop(5_000, 1_000), { ok: true, minutes: 0, seconds: 1 }); // clock went backwards
+  assert.deepEqual(timerStop(0, 24 * H), { ok: true, minutes: 1440, seconds: 0 });
   const late = timerStop(0, 24 * H + 60_000);
   assert.equal(late.ok, false);
   assert.equal(late.reason, 'too-long');
@@ -194,4 +197,23 @@ test('validateTimerStart: must be a real time, not in the future, and not absurd
   assert.equal(validateTimerStart(now, now).ok, true);
   assert.match(validateTimerStart(now + 60_000, now).error, /future/i);
   assert.match(validateTimerStart(NaN, now).error, /valid date and time/i);
+});
+
+test('seconds: formatDurationSeconds, entrySeconds, totalSeconds', () => {
+  assert.equal(formatDurationSeconds(5430 + 12), '1h 30m 42s');
+  assert.equal(formatDurationSeconds(91), '0h 1m 31s');
+  assert.equal(formatDurationSeconds(0), '0h 0m 0s');
+  assert.equal(entrySeconds({ minutes: 2, seconds: 5 }), 125);
+  assert.equal(entrySeconds({ minutes: 2 }), 120); // entries made before seconds existed
+  assert.equal(totalSeconds([{ minutes: 1, seconds: 31 }, { minutes: 2 }]), 211);
+});
+test('validateEntry: seconds are optional, 0 to 59, count toward the total, and stay within 24 hours', () => {
+  const base = { date: '2026-11-20', hours: '0', minutes: '0' };
+  const only = validateEntry({ ...base, seconds: 3 });
+  assert.equal(only.ok, true);
+  assert.deepEqual(only.value, { date: '2026-11-20', minutes: 0, seconds: 3, note: '' });
+  assert.equal(validateEntry({ ...base, minutes: '5' }).value.seconds, 0);
+  assert.ok(validateEntry({ ...base, seconds: 60 }).errors.seconds);
+  assert.ok(validateEntry({ ...base, seconds: -1 }).errors.seconds);
+  assert.ok(validateEntry({ date: '2026-11-20', hours: '24', minutes: '0', seconds: 1 }).errors.total);
 });
