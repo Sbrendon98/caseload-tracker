@@ -3,7 +3,8 @@
 import { useApp } from '../context/AppContext.jsx';
 import { useDialogs } from '../context/Dialogs.jsx';
 import { useToast } from '../context/Toast.jsx';
-import { EditCaseSheet, LimitSheet, NewCaseSheet } from '../components/CaseSheets.jsx';
+import { EditCaseSheet, NewCaseSheet } from '../components/CaseSheets.jsx';
+import { LimitSheet } from '../components/LimitSheet.jsx';
 import { navigate } from './useRoute.js';
 import { routes } from '../../js/router.js';
 

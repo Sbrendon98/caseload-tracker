@@ -3,11 +3,11 @@ import { Sheet, useDialogs } from '../context/Dialogs.jsx';
 import { useApp } from '../context/AppContext.jsx';
 import { useToast } from '../context/Toast.jsx';
 import { validateBackup } from '../../js/backup.js';
+import { plural } from '../../js/plural.js';
 import { activeCount } from '../../js/cases.js';
 import { formatDurationSeconds, totalSeconds } from '../../js/durations.js';
 
-const plural = (n, word) => `${n} ${word}${n === 1 ? '' : 's'}`;
-const timeEntries = n => `${n} time ${n === 1 ? 'entry' : 'entries'}`;
+const timeEntries = n => plural(n, 'time entry', 'time entries');
 
 function ProblemSheet({ title, messages, onClose }) {
   return (

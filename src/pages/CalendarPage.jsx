@@ -3,15 +3,14 @@
 import { useState } from 'preact/hooks';
 import { useApp } from '../context/AppContext.jsx';
 import { Sheet, useDialogs } from '../context/Dialogs.jsx';
+import { MonthGrid } from '../components/MonthGrid.jsx';
 import { Page } from '../components/Page.jsx';
 import { useTutorial } from '../hooks/useTutorial.jsx';
 import { formatDateLong, formatMonth } from '../../js/format.js';
 import { casesForDay, entriesByDay, shiftMonth } from '../../js/calendar.js';
-import { dayOfWeek, monthGrid, parseISO } from '../../js/dates.js';
+import { monthGrid, parseISO } from '../../js/dates.js';
 import { routes } from '../../js/router.js';
 import { formatDurationSeconds } from '../../js/durations.js';
-
-const level = seconds => (seconds >= 180 * 60 ? 3 : seconds >= 60 * 60 ? 2 : 1);
 
 function startingMonth(today, dateParam) {
   try {
@@ -21,11 +20,6 @@ function startingMonth(today, dateParam) {
     const { y, m } = parseISO(today);
     return { year: y, month: m };
   }
-}
-
-function weekdayLetter(iso) {
-  const { y, m, d } = parseISO(iso);
-  return new Date(y, m - 1, d).toLocaleDateString(undefined, { weekday: 'narrow' });
 }
 
 function DaySheet({ date, caseId, onClose }) {
@@ -70,7 +64,6 @@ export function CalendarPage({ query }) {
   const weekStart = store.getMeta('weekStart', 0);
   const byDay = entriesByDay(store.cases(), { caseId: caseId || null });
   const weeks = monthGrid(shown.year, shown.month, weekStart);
-  const todayIso = today();
   const cases = [...store.cases()].sort((a, b) => a.displayId.localeCompare(b.displayId));
 
   const openDay = date => dialogs.open(({ close }) => <DaySheet date={date} caseId={caseId} onClose={close} />);
@@ -89,30 +82,7 @@ export function CalendarPage({ query }) {
         <h2 class="cal-title" aria-live="polite">{formatMonth(shown.year, shown.month)}</h2>
         <button type="button" class="btn" aria-label="Next month" onClick={() => setShown(shiftMonth(shown, 1))}>›</button>
       </div>
-      <div class="cal-grid">
-        <div class="cal-row cal-head" aria-hidden="true">
-          {weeks[0].map(({ date }) => <span key={date}>{weekdayLetter(date)}</span>)}
-        </div>
-        {weeks.map(week => (
-          <div key={week[0].date} class="cal-row">
-            {week.map(({ date, inMonth }) => {
-              const seconds = byDay.get(date) ?? 0;
-              const weekday = dayOfWeek(date);
-              const classes = ['cal-cell', !inMonth && 'out', (weekday === 0 || weekday === 6) && 'weekend', date === todayIso && 'today'];
-              return (
-                <button
-                  key={date} type="button" class={classes.filter(Boolean).join(' ')} disabled={!inMonth}
-                  aria-label={seconds > 0 ? `${formatDateLong(date)}, ${formatDurationSeconds(seconds)} logged` : formatDateLong(date)}
-                  onClick={() => openDay(date)}
-                >
-                  <span class="num">{parseISO(date).d}</span>
-                  {seconds > 0 && <span class={`dot lvl${level(seconds)}`} aria-hidden="true" />}
-                </button>
-              );
-            })}
-          </div>
-        ))}
-      </div>
+      <MonthGrid weeks={weeks} secondsByDay={byDay} todayIso={today()} onPickDay={openDay} />
       <p class="muted cal-hint">A dot marks a day with time logged. Tap a day to see which cases you worked on.</p>
     </Page>
   );
