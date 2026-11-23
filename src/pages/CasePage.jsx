@@ -1,5 +1,5 @@
 // Case detail: total, due date, notes, timer, add time, entries, and case actions.
-import { useEffect, useState } from 'preact/hooks';
+import { useEffect, useRef, useState } from 'preact/hooks';
 import { useApp } from '../context/AppContext.jsx';
 import { Sheet, useDialogs } from '../context/Dialogs.jsx';
 import { useToast } from '../context/Toast.jsx';
@@ -82,6 +82,9 @@ function TimerCard({ c }) {
     return () => clearInterval(id);
   }, [running]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  const stopping = useRef(false); // synchronous, so it blocks a tap that lands before the next render
+  const [busy, setBusy] = useState(false);
+
   const start = () => guard(store.setMeta('timer', { caseId: c.id, startedAt: now() }));
 
   async function discard() {
@@ -98,8 +101,15 @@ function TimerCard({ c }) {
 
   /** Saves the entry now; she can correct it afterwards with Edit. Over 24 hours asks instead of guessing. */
   async function stop() {
+    if (stopping.current) return; // a second tap while the first save is running
     const result = timerStop(timer.startedAt, now());
     if (!result.ok) { openStartTime(true); return; }
+    stopping.current = true;
+    setBusy(true);
+    try { await save(result); } finally { stopping.current = false; setBusy(false); }
+  }
+
+  async function save(result) {
     const r = await guard(store.addEntry(c.id, {
       date: todayLocal(new Date(timer.startedAt)),
       hours: String(Math.floor(result.minutes / 60)),
@@ -123,7 +133,7 @@ function TimerCard({ c }) {
         <div class="button-row">
           <button type="button" class="btn" onClick={discard}>Discard</button>
           <button type="button" class="btn" onClick={() => openStartTime(false)}>Edit start time</button>
-          <button type="button" class="btn primary" onClick={stop}>Stop timer and save</button>
+          <button type="button" class="btn primary" disabled={busy} onClick={stop}>Stop timer and save</button>
         </div>
       </section>
     );

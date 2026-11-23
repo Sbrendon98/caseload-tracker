@@ -314,3 +314,15 @@ test('the timer survives a reload and keeps counting from its real start time', 
   await waitFor(() => expect(screen.getByText('Timer running')).toBeTruthy());
   expect(document.querySelector('.clock').textContent).toBe('7:00');
 });
+
+test('tapping Stop twice quickly saves ONE entry, not two', async () => {
+  const { store, time, id } = await openCaseWithRunningTimer();
+  time.now += 5 * MIN;
+  const stop = screen.getByRole('button', { name: 'Stop timer and save' });
+  fireEvent.click(stop);
+  fireEvent.click(stop); // second tap before the first save has finished
+  await waitFor(() => expect(store.getMeta('timer')).toBeUndefined());
+  await new Promise(r => setTimeout(r, 50));
+  expect(store.getCase(id).entries).toHaveLength(1);
+  expect(store.getCase(id).entries[0].minutes).toBe(5);
+});
