@@ -9,7 +9,7 @@ import { formatDateLong, formatMonth } from '../../js/format.js';
 import { casesForDay, entriesByDay, shiftMonth } from '../../js/calendar.js';
 import { dayOfWeek, monthGrid, parseISO } from '../../js/dates.js';
 import { routes } from '../../js/router.js';
-import { formatDurationSeconds } from '../../js/model.js';
+import { formatDurationSeconds } from '../../js/durations.js';
 
 const level = seconds => (seconds >= 180 * 60 ? 3 : seconds >= 60 * 60 ? 2 : 1);
 

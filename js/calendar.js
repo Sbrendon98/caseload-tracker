@@ -1,6 +1,6 @@
 // Pure grouping of time entries by calendar day. Archived cases are included. Times are in seconds,
 // so a timer entry shorter than a minute still counts.
-import { entrySeconds } from './model.js';
+import { entrySeconds } from './durations.js';
 
 function relevant(cases, caseId) {
   return caseId ? cases.filter(c => c.id === caseId) : cases;

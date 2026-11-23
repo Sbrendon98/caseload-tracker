@@ -2,7 +2,7 @@
 // time in words and a single cell listing every date and time worked, so a supervisor reads one line
 // per student instead of one per time entry.
 import { inRange, parseISO } from './dates.js';
-import { decimalHours, durationInWords, durationShort, entrySeconds, totalSeconds } from './model.js';
+import { decimalHours, durationInWords, durationShort, entrySeconds, totalSeconds } from './durations.js';
 
 /** Whole minutes, rounded up, so a 4 second timer entry reads as 1 minute rather than 0. */
 const ceilMinutes = seconds => Math.ceil(seconds / 60);

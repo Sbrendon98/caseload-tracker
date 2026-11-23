@@ -1,7 +1,7 @@
 // In-memory stand-in for js/db.js's adapter, used only by tests. Mimics what IndexedDB
 // gives us: structured-clone isolation, atomic writes, and a unique displayIdKey index.
 import { StorageError } from '../js/db.js';
-import { displayIdKey } from '../js/model.js';
+import { displayIdKey } from '../js/cases.js';
 
 const clone = v => JSON.parse(JSON.stringify(v));
 const tombKey = t => `${t.type}:${t.id}`;

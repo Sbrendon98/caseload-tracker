@@ -1,6 +1,6 @@
 // IndexedDB adapter. The only module that touches indexedDB. Every failure is a StorageError
 // with a message that is safe to show to the user. Not importable-for-effect: nothing runs on import.
-import { displayIdKey } from './model.js';
+import { displayIdKey } from './cases.js';
 
 const DB_NAME = 'caseload-tracker';
 const DB_VERSION = 1;

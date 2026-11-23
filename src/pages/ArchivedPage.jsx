@@ -5,7 +5,7 @@ import { useCaseActions } from '../hooks/useCaseActions.jsx';
 import { formatDateShort } from '../../js/format.js';
 import { todayLocal } from '../../js/dates.js';
 import { routes } from '../../js/router.js';
-import { formatDurationSeconds, totalSeconds } from '../../js/model.js';
+import { formatDurationSeconds, totalSeconds } from '../../js/durations.js';
 
 export function ArchivedPage() {
   const { store } = useApp();

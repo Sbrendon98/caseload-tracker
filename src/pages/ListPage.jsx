@@ -7,7 +7,8 @@ import { useTutorial } from '../hooks/useTutorial.jsx';
 import { formatDateShort } from '../../js/format.js';
 import { inRange, weekRange } from '../../js/dates.js';
 import { routes } from '../../js/router.js';
-import { ACTIVE_LIMIT, dueStatus, formatDurationSeconds, matchesSearch, totalSeconds } from '../../js/model.js';
+import { ACTIVE_LIMIT, dueStatus, matchesSearch } from '../../js/cases.js';
+import { formatDurationSeconds, totalSeconds } from '../../js/durations.js';
 
 function CaseLink({ c, today }) {
   const status = dueStatus(c.dueDate, today);

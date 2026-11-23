@@ -12,7 +12,8 @@ import { SwipeRow } from './SwipeRow.jsx';
 import { formatDateShort } from '../../js/format.js';
 import { todayLocal } from '../../js/dates.js';
 import { routes } from '../../js/router.js';
-import { ACTIVE_LIMIT, activeCount, canAddActive, formatDurationSeconds, totalSeconds } from '../../js/model.js';
+import { ACTIVE_LIMIT, activeCount, canAddActive } from '../../js/cases.js';
+import { formatDurationSeconds, totalSeconds } from '../../js/durations.js';
 
 const DRAFT_NEW_CASE = 'draft:newCase';
 

@@ -1,6 +1,6 @@
 // Pure two-way merge of case data from two devices. Never loses newer data:
 // a delete only wins over something that was last changed before the delete.
-import { displayIdKey, activeCount, ACTIVE_LIMIT } from './model.js';
+import { displayIdKey, activeCount, ACTIVE_LIMIT } from './cases.js';
 
 const DAY_MS = 86_400_000;
 export const TOMBSTONE_TTL_DAYS = 365;

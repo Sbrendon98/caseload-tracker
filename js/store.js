@@ -1,7 +1,8 @@
 // The app's data API. Keeps an in-memory snapshot (so reads are synchronous, which the iOS
 // share sheet needs) and writes through to the db adapter. Writes run one at a time, and the
 // snapshot only changes after the db write succeeded.
-import { validateCase, validateEntry, canAddActive } from './model.js';
+import { validateCase, canAddActive } from './cases.js';
+import { validateEntry } from './entries.js';
 import { mergeData } from './merge.js';
 
 const tombKey = t => `${t.type}:${t.id}`;

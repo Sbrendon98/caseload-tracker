@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { test } from './harness.mjs';
 import { parseHash, routes } from '../js/router.js';
 import { formatDateLong, formatClock, formatMonth } from '../js/format.js';
-import { matchesSearch } from '../js/model.js';
+import { matchesSearch } from '../js/cases.js';
 import { directionLock, clampOffset, settle } from '../js/swipe.js';
 
 // ---- router ----

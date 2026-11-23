@@ -1,6 +1,8 @@
 // Pure backup format: build, validate, and the small "should we nudge her" rules.
 import { parseISO } from './dates.js';
-import { parseName, isValidCaseNumber, makeDisplayId, displayIdKey, activeCount, ACTIVE_LIMIT } from './model.js';
+import { parseName } from './names.js';
+import { isValidCaseNumber, makeDisplayId, displayIdKey, activeCount, ACTIVE_LIMIT } from './cases.js';
+import { MAX_ENTRY_SECONDS } from './entries.js';
 
 export const BACKUP_APP = 'caseload-tracker';
 export const BACKUP_VERSION = 1;
@@ -79,7 +81,7 @@ export function validateBackup(text) {
       if (!isDate(e.date)) addError(`${ew} has an invalid date.`);
       const secs = e.seconds ?? 0;
       if (!Number.isInteger(secs) || secs < 0 || secs > 59) addError(`${ew} has invalid seconds.`);
-      else if (!Number.isInteger(e.minutes) || e.minutes < 0 || e.minutes > 24 * 60 || e.minutes * 60 + secs < 1 || e.minutes * 60 + secs > 24 * 3600) addError(`${ew} has an invalid time.`);
+      else if (!Number.isInteger(e.minutes) || e.minutes < 0 || e.minutes * 60 + secs < 1 || e.minutes * 60 + secs > MAX_ENTRY_SECONDS) addError(`${ew} has an invalid time.`);
       if (e.note != null && typeof e.note !== 'string') addError(`${ew} has an invalid note.`);
       if (!isTime(e.createdAt)) addError(`${ew} has an invalid createdAt.`);
       if (e.updatedAt != null && !isTime(e.updatedAt)) addError(`${ew} has an invalid updatedAt.`);

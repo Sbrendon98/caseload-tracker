@@ -12,7 +12,9 @@ import { navigate } from '../hooks/useRoute.js';
 import { formatClock, formatDateLong } from '../../js/format.js';
 import { fromDateTimeLocal, todayLocal, toDateTimeLocal } from '../../js/dates.js';
 import { routes } from '../../js/router.js';
-import { entrySeconds, formatDurationSeconds, timerStop, totalSeconds, validateEntry, validateTimerStart } from '../../js/model.js';
+import { entrySeconds, formatDurationSeconds, totalSeconds } from '../../js/durations.js';
+import { timerStop, validateTimerStart } from '../../js/timer.js';
+import { validateEntry } from '../../js/entries.js';
 
 /** Fix when a timer was started late or forgotten. Also shown when it has run past 24 hours. */
 function StartTimeSheet({ startedAt, tooLong, onSave, onClose }) {

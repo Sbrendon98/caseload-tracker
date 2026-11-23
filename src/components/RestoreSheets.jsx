@@ -3,7 +3,8 @@ import { Sheet, useDialogs } from '../context/Dialogs.jsx';
 import { useApp } from '../context/AppContext.jsx';
 import { useToast } from '../context/Toast.jsx';
 import { validateBackup } from '../../js/backup.js';
-import { activeCount, totalMinutes } from '../../js/model.js';
+import { activeCount } from '../../js/cases.js';
+import { formatDurationSeconds, totalSeconds } from '../../js/durations.js';
 
 const plural = (n, word) => `${n} ${word}${n === 1 ? '' : 's'}`;
 const timeEntries = n => `${n} time ${n === 1 ? 'entry' : 'entries'}`;
@@ -53,7 +54,7 @@ function RestoreSheet({ result, onClose }) {
   const toast = useToast();
   const current = store.cases();
   const currentEntries = current.reduce((n, c) => n + c.entries.length, 0);
-  const minutes = totalMinutes(result.data.cases.flatMap(c => c.entries));
+  const totalTime = formatDurationSeconds(totalSeconds(result.data.cases.flatMap(c => c.entries)));
 
   async function merge(dismiss) {
     dismiss();
@@ -81,7 +82,7 @@ function RestoreSheet({ result, onClose }) {
         <div>
           <p>
             <strong>In the backup: </strong>
-            {plural(result.summary.cases, 'case')} ({result.summary.activeCases} active), {timeEntries(result.summary.entries)}, {Math.floor(minutes / 60)}h {minutes % 60}m in total.
+            {plural(result.summary.cases, 'case')} ({result.summary.activeCases} active), {timeEntries(result.summary.entries)}, {totalTime} in total.
           </p>
           <p>
             <strong>On this device now: </strong>
