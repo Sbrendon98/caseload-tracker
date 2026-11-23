@@ -22,7 +22,7 @@ export function useTutorial(id, { enabled = true, over = false } = {}) {
     tutorialsShown.add(id); // now: the saved flag below lands a moment later
     dialogs.open(({ close }) => <TutorialSheet id={id} onClose={close} />);
     guard(store.setMeta('tutorialsSeen', markSeen(seen, id)));
-  }, [enabled]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [enabled]); // runs once per screen, when the tutorial becomes allowed
 }
 
 export function openTutorial(dialogs, id) {

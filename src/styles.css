@@ -81,13 +81,16 @@ a { color: var(--accent); }
   min-height: var(--tap); padding: 0 16px; border-radius: 10px;
   border: 1px solid var(--border); background: var(--surface); color: var(--text);
   font: inherit; font-weight: 600; cursor: pointer;
+  /* Centres the label in <button>s and <a> link-buttons alike. */
+  display: inline-flex; align-items: center; justify-content: center;
+  box-sizing: border-box; text-align: center; text-decoration: none; line-height: 1.2;
 }
 .btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-text); }
 .btn.danger { color: var(--danger); }
-.btn.block { display: block; width: 100%; }
+.btn.block { display: flex; width: 100%; }
 .btn.small { min-height: 36px; padding: 0 12px; font-size: 0.9rem; }
 .btn:disabled { opacity: 0.5; }
-.button-row { display: flex; gap: 10px; justify-content: flex-end; margin-top: 14px; }
+.button-row { display: flex; flex-wrap: wrap; gap: 10px; justify-content: flex-end; margin-top: 14px; }
 .icon-btn { min-width: var(--tap); min-height: var(--tap); background: none; border: 0; color: var(--muted); font-size: 1.1rem; cursor: pointer; }
 
 input, textarea, select {
@@ -95,13 +98,15 @@ input, textarea, select {
   border: 1px solid var(--border); border-radius: 10px; background: var(--surface); color: var(--text);
   font: inherit; font-size: 16px; /* 16px stops iOS zooming into the field */
 }
+input[type="date"], input[type="datetime-local"] { min-width: 0; max-width: 100%; -webkit-appearance: none; appearance: none; } /* Safari gives these a wide minimum */
 textarea { resize: vertical; }
 .search { margin-bottom: 12px; }
-.field { display: block; margin-bottom: 12px; }
+.field { display: block; min-width: 0; margin-bottom: 12px; }
 .label { display: block; font-size: 0.85rem; color: var(--muted); margin-bottom: 4px; }
 .field-error, .form-error { display: block; color: var(--danger); font-size: 0.9rem; margin-top: 4px; }
 .form-error { margin: 4px 0 0; }
-.row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.row-2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.row-inline > *, .row-2 > * { min-width: 0; } /* let fields shrink instead of overlapping their neighbours */
 .row-inline { display: flex; align-items: flex-end; gap: 10px; }
 .row-inline .label { flex: 1; }
 .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
@@ -114,6 +119,9 @@ textarea { resize: vertical; }
 /* ---------- cards and detail ---------- */
 .card { background: var(--surface); border-radius: var(--radius); padding: 14px 16px; margin-bottom: 14px; }
 .card.actions { display: grid; gap: 10px; }
+/* Timer: Stop is the main action, so it gets its own full-width row above the two smaller ones. */
+.timer-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-top: 14px; }
+.timer-actions .primary { grid-column: 1 / -1; grid-row: 1; }
 .total-label { color: var(--muted); font-size: 0.9rem; }
 .total { font-size: 2.4rem; font-weight: 700; line-height: 1.1; margin-bottom: 10px; }
 .clock { font-size: 2.2rem; font-variant-numeric: tabular-nums; font-weight: 700; }
@@ -178,7 +186,6 @@ textarea { resize: vertical; }
 .toast-action { min-height: var(--tap); padding: 0 10px; background: none; border: 0; color: inherit; font: inherit; font-weight: 700; text-decoration: underline; cursor: pointer; }
 
 /* ---------- calendar ---------- */
-a.btn, a.btn.block { display: flex; align-items: center; justify-content: center; text-decoration: none; }
 .cal-nav { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: 4px 0 8px; }
 .cal-title { margin: 0; font-size: 1.15rem; text-align: center; flex: 1; }
 .cal-grid { background: var(--surface); border-radius: var(--radius); padding: 8px 6px; }
@@ -223,14 +230,3 @@ a.btn:focus-visible, .btn:focus-visible, .chip:focus-visible { outline: 3px soli
 .tutorial h3 { margin: 4px 0 8px; font-size: 1.2rem; }
 .tutorial p { margin-bottom: 10px; }
 .steps-count { font-size: 0.85rem; }
-
-/* ---------- layout hardening (narrow phones, Safari date inputs) ---------- */
-.button-row { flex-wrap: wrap; }
-.row-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-.row-inline > *, .row-2 > *, .field, .case-link { min-width: 0; }
-input[type="date"], input[type="datetime-local"] { min-width: 0; max-width: 100%; -webkit-appearance: none; appearance: none; }
-.btn { box-sizing: border-box; }
-a.btn, a.btn.block { display: flex; align-items: center; justify-content: center; text-decoration: none; text-align: center; line-height: 1.2; }
-/* Timer: Stop is the main action, so it gets its own full-width row above the two smaller ones. */
-.timer-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-top: 14px; }
-.timer-actions .primary { grid-column: 1 / -1; grid-row: 1; }

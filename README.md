@@ -95,20 +95,29 @@ The file name looks like `caseload-week-2026-11-15.csv` (range plus the start da
 
 ```
 index.html, vite.config.js, public/       manifest, icons (copied as is)
-js/                  rules and data, no framework
-  dates.js           week (Sun/Mon start), month, school year, month grid
-  model.js           names, validation, totals, the 50-case rule
-  csv.js, backup.js, merge.js, calendar.js, tutorials.js, router.js, format.js, env.js
+js/                  the rules and data, no framework, each file one job
+  dates.js           week (Sun/Mon start), month, school year, month grid, date-time inputs
+  names.js           first name + last initial, or initials
+  cases.js           case IDs, uniqueness, the 50-case rule, due status, search
+  entries.js         one time entry: hours, minutes, seconds, the 24-hour limit
+  timer.js           stopping and correcting a running timer
+  durations.js       totals in seconds and how times are worded
+  csv.js             one row per case
+  backup.js          the backup file and checking one before restoring
+  backupRecords.js   checks one case, entry or deleted-item record from a backup
+  merge.js           two-way merge of two devices' data
+  reminders.js       when to nudge: back up, use the installed app
+  calendar.js, tutorials.js, router.js, format.js, env.js
   db.js              IndexedDB wrapper (the only place that touches it)
   store.js           data API with an in-memory snapshot
   swipe.js           swipe-to-reveal gesture
 src/                 the screens
   main.jsx, App.jsx
   pages/             list, case, calendar, options, archived
-  components/        forms, sheets, banners, swipe row
+  components/        forms, sheets, banners, swipe row, timer card, entry list
   context/, hooks/   shared state, dialogs, toasts, sharing, tutorials
   lib/deliverFile.js hands a file to the iOS share sheet
-tests/               unit and component tests
+tests/               unit and component tests; each js/ file has a matching test file
 scripts/make-icons.mjs
 ```
 

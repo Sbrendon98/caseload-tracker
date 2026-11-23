@@ -64,7 +64,7 @@ export function TimerCard({ c }) {
     setTick(now());
     const id = setInterval(() => setTick(now()), 1000);
     return () => clearInterval(id);
-  }, [running]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [running]); // only restart the ticking when the timer starts or stops
 
   const stopping = useRef(false); // synchronous, so it blocks a tap that lands before the next render
   const [busy, setBusy] = useState(false);
