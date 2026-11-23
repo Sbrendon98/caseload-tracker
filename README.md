@@ -117,7 +117,7 @@ src/                 the screens
   components/        forms, sheets, banners, swipe row, timer card, entry list
   context/, hooks/   shared state, dialogs, toasts, sharing, tutorials
   lib/deliverFile.js hands a file to the iOS share sheet
-tests/               unit and component tests; each js/ file has a matching test file
+tests/               unit tests (one file per js/ module) and whole-app tests (app.*.test.jsx)
 scripts/make-icons.mjs
 ```
 
