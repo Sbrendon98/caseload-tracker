@@ -80,6 +80,25 @@ Your data exists only on the device. If you clear Safari's website data, delete 
 
 To use it on a computer too: open the site in a browser, back up on the phone, move the file across, and **Restore** with **Merge**. Each browser or installed app has its own separate data, so repeat the backup and restore whenever you want them to match.
 
+## Keeping it running for years
+
+The app is built so that, once installed, it does not need updates, a server or an internet connection.
+
+- **Nothing expires.** The code has no dates, licences, keys or timers that run out, and the offline cache has no expiry. Only one library (Preact) is inside the app, and it is bundled into the files, so nothing is fetched from anywhere when it runs.
+- **If the website disappears,** an app that is already installed keeps working from its offline copy, with her data. Only *new* installs need the site. (Tested in Chrome by making every file return "not found": the app still opened with its data. Safari behaves the same way as far as I know, but that is untested.)
+- **Her data is safe on an installed iPhone app.** Safari clears a *browser tab's* stored data after about a week of not visiting, but Home Screen apps are exempt (documented by WebKit). That is another reason to use only the installed icon.
+- **What can still lose data:** deleting the app or its icon, "Clear Website Data", an iPhone reset or a new phone, or a very full phone. A backup file in iCloud Drive covers all of these.
+
+**Do not rename the GitHub account or repository.** The address is part of where her data lives. A new address is a new, empty app, and the installed one keeps its old data but can no longer update.
+
+**If the site ever has to move** (GitHub changes its rules, the account closes, and so on):
+
+1. On any computer with Node: `npm install` then `npm run build`. This makes a `dist/` folder, which is the whole app.
+2. Upload `dist/` to any static host (GitHub Pages in another account, Netlify, a school server). Nothing needs configuring; the app works from any folder.
+3. On her phone: **Back up** in the old app, add the new address to the Home Screen, then **Restore** (choose **Replace**) in the new app. Different address, different storage, so the backup file is what carries her data across.
+
+It is worth keeping a copy of the project folder and a zipped `dist/` somewhere safe (a USB stick or cloud drive). That alone is enough to put the app back online.
+
 ## CSV columns
 
 `Initials, Case Number, Total Time, Decimal Hours, Dates and Times, Case Due Date, Case Notes`
